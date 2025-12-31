@@ -1,0 +1,351 @@
+/* ---------- Base (fallback) ---------- */
+:root {
+  --bg: #ffffff;
+  --text: #222222;
+  --border-color: #dddddd;
+  --link-color: #007bff;
+  --sidebar-bg: #f5f5f5;
+  --sidebar-hover-bg: #e5e7eb;
+  --popover-bg: #2f2f2f;
+  --popover-text: #ffffff;
+  --icon-color: #000;
+  /* button defaults */
+  --button-bg: #007bff;
+  --button-text: #ffffff;
+  --button-hover-bg: #0056b3;
+  /* form defaults */
+  --form-header-bg: #e9ecef;
+  --form-body-bg: #ffffff;
+  --form-text-color: #222222;
+  --form-text-caption: #6c757d;
+  --formfield-label: #222222;
+  --formfield-helper: #6c757d;
+  --formfield-error: #dc2626;
+  /* card defaults */
+  --card-bg: #ffffff;
+  --card-text: #222222;
+  /* scrollbar defaults */
+  --scrollbar-bg: #f1f1f1;
+  --scrollbar-thumb: #c1c1c1;
+  --scrollbar-thumb-hover: #a1a1a1;
+}
+
+/* ---------- Light Theme ---------- */
+body.theme-light {
+  --bg: #ffffff;
+  --text: #222222;
+  --border-color: #dddddd;
+  --link-color: #007bff;
+  --sidebar-bg: #f5f5f5;
+  --sidebar-hover-bg: #e5e7eb; 
+  --popover-bg: #2f2f2f;
+  --popover-text: #ffffff;
+  --icon-color: #000;
+  /* button */
+  --button-bg: #007bff;
+  --button-text: #ffffff;
+  --button-hover-bg: #0056b3;
+  /* form */
+  --form-header-bg: #e9ecef;
+  --form-body-bg: #ffffff;
+  --form-text-color: #222222;
+  --form-text-caption: #6c757d;
+  --formfield-label: #222222;
+  --formfield-helper: #6c757d;
+  --formfield-error: #dc2626;
+  /* card */
+  --card-bg: #ffffff;
+  --card-text: #222222;
+  /* scrollbar */
+  --scrollbar-bg: #f1f1f1;
+  --scrollbar-thumb: #c1c1c1;
+  --scrollbar-thumb-hover: #a1a1a1;
+}
+
+/* ---------- Dark Theme ---------- */
+body.theme-dark {
+  --bg: #1e1e1e;
+  --text: #e0e0e0;
+  --border-color: #444444;
+  --link-color: #66b2ff;
+  --sidebar-bg: #2a2a2a;
+  --sidebar-hover-bg: #3a3a3a;
+  --popover-bg: #ffffff;
+  --popover-text: #222222;
+  --icon-color: #fff;
+  /* button */
+  --button-bg: #444444;
+  --button-text: #ffffff;
+  --button-hover-bg: #666666;
+  /* form */
+  --form-header-bg: #333333;
+  --form-body-bg: #252525;
+  --form-text-color: #e0e0e0;
+  --form-text-caption: #aaaaaa;
+  --formfield-label: #e0e0e0;
+  --formfield-helper: #aaaaaa;
+  --formfield-error: #f87171;
+  /* card */
+  --card-bg: #2a2a2a;
+  --card-text: #e0e0e0;
+  /* scrollbar */
+  --scrollbar-bg: #2a2a2a;
+  --scrollbar-thumb: #4b4b4b;
+  --scrollbar-thumb-hover: #666666;
+}
+
+/* ---------- Light Blue Theme ---------- */
+body.theme-light-blue {
+  --bg: #e6f2ff;
+  --text: #1a1a1a;
+  --border-color: #99ccff;
+  --link-color: #0066cc;
+  --sidebar-bg: #cce6ff;
+  --sidebar-hover-bg: #b3d9ff;
+  --popover-bg: #1b263b;
+  --popover-text: #ffffff;
+  --icon-color: #000;
+  /* button */
+  --button-bg: #3399ff;
+  --button-text: #ffffff;
+  --button-hover-bg: #267acc;
+  /* form */
+  --form-header-bg: #b3d9ff;
+  --form-body-bg: #f5faff;
+  --form-text-color: #1a1a1a;
+  --form-text-caption: #4d6a85;
+  --formfield-label: #1a1a1a;
+  --formfield-helper: #4d6a85;
+  --formfield-error: #dc2626;
+  /* card */
+  --card-bg: #f0f8ff;
+  --card-text: #1a1a1a;
+  /* scrollbar */
+  --scrollbar-bg: #cce6ff;
+  --scrollbar-thumb: #99ccff;
+  --scrollbar-thumb-hover: #66b2ff;
+}
+
+/* ---------- Dark Blue Theme ---------- */
+body.theme-dark-blue {
+  --bg: #0d1b2a;
+  --text: #e0f0ff;
+  --border-color: #2e4a70;
+  --link-color: #4ea8de;
+  --sidebar-bg: #1b263b;
+  --sidebar-hover-bg: #2e4a70;
+  --popover-bg: #e6f2ff;
+  --popover-text: #1a1a1a;
+  --icon-color: #fff;
+  /* button */
+  --button-bg: #1e40af;
+  --button-text: #ffffff;
+  --button-hover-bg: #1a3391;
+  /* form */
+  --form-header-bg: #1e3a5f;
+  --form-body-bg: #16213e;
+  --form-text-color: #e0f0ff;
+  --form-text-caption: #9bbad6;
+  --formfield-label: #e0f0ff;
+  --formfield-helper: #9bbad6;
+  --formfield-error: #f87171;
+  /* card */
+  --card-bg: #1b263b;
+  --card-text: #e0f0ff;
+  /* scrollbar */
+  --scrollbar-bg: #1b263b;
+  --scrollbar-thumb: #2e4a70;
+  --scrollbar-thumb-hover: #4ea8de;
+}
+
+/* ---------- Light Red Theme ---------- */
+body.theme-light-red {
+  --bg: #fff0f0;
+  --text: #1a1a1a;
+  --border-color: #ffb3b3;
+  --link-color: #c0392b;
+  --sidebar-bg: #ffe0e0;
+  --sidebar-hover-bg: #ffcccc;
+  --popover-bg: #3d1a1a;
+  --popover-text: #ffffff;
+  --icon-color: #000;
+  /* button */
+  --button-bg: #e74c3c;
+  --button-text: #ffffff;
+  --button-hover-bg: #c0392b;
+  /* form */
+  --form-header-bg: #ffcccc;
+  --form-body-bg: #fff5f5;
+  --form-text-color: #1a1a1a;
+  --form-text-caption: #a05c5c;
+  --formfield-label: #1a1a1a;
+  --formfield-helper: #a05c5c;
+  --formfield-error: #dc2626;
+  /* card */
+  --card-bg: #ffe6e6;
+  --card-text: #1a1a1a;
+  /* scrollbar */
+  --scrollbar-bg: #ffe0e0;
+  --scrollbar-thumb: #ffb3b3;
+  --scrollbar-thumb-hover: #e74c3c;
+}
+
+/* ---------- Dark Red Theme ---------- */
+body.theme-dark-red {
+  --bg: #2a0e0e;
+  --text: #f5eaea;
+  --border-color: #5c2a2a;
+  --link-color: #ff6b6b;
+  --sidebar-bg: #3d1a1a;
+  --sidebar-hover-bg: #5c2a2a;
+  --popover-bg: #ffe6e6;
+  --popover-text: #1a1a1a;
+  --icon-color: #fff;
+  /* button */
+  --button-bg: #a93226;
+  --button-text: #ffffff;
+  --button-hover-bg: #922b21;
+  /* form */
+  --form-header-bg: #4b1f1f;
+  --form-body-bg: #2f0f0f;
+  --form-text-color: #f5eaea;
+  --form-text-caption: #c58c8c;
+  --formfield-label: #f5eaea;
+  --formfield-helper: #c58c8c;
+  --formfield-error: #f87171;
+  /* card */
+  --card-bg: #4b1f1f;
+  --card-text: #f5eaea;
+  /* scrollbar */
+  --scrollbar-bg: #3d1a1a;
+  --scrollbar-thumb: #5c2a2a;
+  --scrollbar-thumb-hover: #a93226;
+}
+
+/* ---------- Light Green Theme ---------- */
+body.theme-light-green {
+  --bg: #f0fff5;
+  --text: #1a1a1a;
+  --border-color: #a8e0c2;
+  --link-color: #1e8449;
+  --sidebar-bg: #d9f2e6;
+  --sidebar-hover-bg: #b3e6cc;
+  --popover-bg: #1e3d2c;
+  --popover-text: #ffffff;
+  --icon-color: #000;
+  /* button */
+  --button-bg: #27ae60;
+  --button-text: #ffffff;
+  --button-hover-bg: #1e8449;
+  /* form */
+  --form-header-bg: #b3e6cc;
+  --form-body-bg: #f5fff9;
+  --form-text-color: #1a1a1a;
+  --form-text-caption: #4b7a5f;
+  --formfield-label: #1a1a1a;
+  --formfield-helper: #4b7a5f;
+  --formfield-error: #dc2626;
+  /* card */
+  --card-bg: #e0f7eb;
+  --card-text: #1a1a1a;
+  /* scrollbar */
+  --scrollbar-bg: #d9f2e6;
+  --scrollbar-thumb: #a8e0c2;
+  --scrollbar-thumb-hover: #27ae60;
+}
+
+/* ---------- Dark Green Theme ---------- */
+body.theme-dark-green {
+  --bg: #0f2a1c;
+  --text: #eaf7f0;
+  --border-color: #2f5d40;
+  --link-color: #58d68d;
+  --sidebar-bg: #1e3d2c;
+  --sidebar-hover-bg: #2f5d40;
+  --popover-bg: #e0f7eb;
+  --popover-text: #1a1a1a;
+  --icon-color: #fff;
+  /* button */
+  --button-bg: #1f7a4d;
+  --button-text: #ffffff;
+  --button-hover-bg: #17663e;
+  /* form */
+  --form-header-bg: #234d36;
+  --form-body-bg: #142d1f;
+  --form-text-color: #eaf7f0;
+  --form-text-caption: #a6cabb;
+  --formfield-label: #eaf7f0;
+  --formfield-helper: #a6cabb;
+  --formfield-error: #f87171;
+  /* card */
+  --card-bg: #234d36;
+  --card-text: #eaf7f0;
+  /* scrollbar */
+  --scrollbar-bg: #1e3d2c;
+  --scrollbar-thumb: #2f5d40;
+  --scrollbar-thumb-hover: #58d68d;
+}
+
+/* ---------- Light Yellow Theme ---------- */
+body.theme-light-yellow {
+  --bg: #fffdf0;
+  --text: #1a1a1a;
+  --border-color: #ffe680;
+  --link-color: #d4ac0d;
+  --sidebar-bg: #fff6cc;
+  --sidebar-hover-bg: #ffec99;
+  --popover-bg: #3d361a;
+  --popover-text: #ffffff;
+  --icon-color: #000;
+  /* button */
+  --button-bg: #f1c40f;
+  --button-text: #222222;
+  --button-hover-bg: #d4ac0d;
+  /* form */
+  --form-header-bg: #ffec99;
+  --form-body-bg: #fffdf5;
+  --form-text-color: #1a1a1a;
+  --form-text-caption: #9c8a4a;
+  --formfield-label: #1a1a1a;
+  --formfield-helper: #9c8a4a;
+  --formfield-error: #dc2626;
+  /* card */
+  --card-bg: #fff7cc;
+  --card-text: #1a1a1a;
+  /* scrollbar */
+  --scrollbar-bg: #fff6cc;
+  --scrollbar-thumb: #ffe680;
+  --scrollbar-thumb-hover: #f1c40f;
+}
+
+/* ---------- Dark Yellow Theme ---------- */
+body.theme-dark-yellow {
+  --bg: #2a260f;
+  --text: #f9f5e6;
+  --border-color: #5c512a;
+  --link-color: #f4d03f;
+  --sidebar-bg: #3d361a;
+  --sidebar-hover-bg: #5c512a;
+  --popover-bg: #fff7cc;
+  --popover-text: #1a1a1a;
+  --icon-color: #fff;
+  /* button */
+  --button-bg: #b7950b;
+  --button-text: #ffffff;
+  --button-hover-bg: #9a7d0a;
+  /* form */
+  --form-header-bg: #4b411f;
+  --form-body-bg: #2f2a14;
+  --form-text-color: #f9f5e6;
+  --form-text-caption: #d1c6a2;
+  --formfield-label: #f9f5e6;
+  --formfield-helper: #d1c6a2;
+  --formfield-error: #f87171;
+  /* card */
+  --card-bg: #4b411f;
+  --card-text: #f9f5e6;
+  /* scrollbar */
+  --scrollbar-bg: #3d361a;
+  --scrollbar-thumb: #5c512a;
+  --scrollbar-thumb-hover: #f4d03f;
+}

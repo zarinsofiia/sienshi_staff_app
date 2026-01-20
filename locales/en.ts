@@ -65,6 +65,7 @@ const en = {
   header_menu: "Menu",
   header_scan: "Scan",
   header_stock: "Stock",
+  header_stock_view: "View Stock",
   header_me: "My Profile",
   header_order: "Orders", // driver header
 
@@ -312,6 +313,7 @@ const en = {
   stock_delete_failed_message: "Unable to delete this stock-in. Please try again.",
   stock_delete_success_title: "Deleted",
   stock_delete_success_message: "Stock-in has been deleted.",
+  stock_parcels: "Parcels",
 
   // ===========================================================================
   // SCAN (PARCEL SCAN / MANUAL SEARCH / CAMERA)
@@ -372,7 +374,7 @@ const en = {
 
   scan_clear_all: "Clear All",
   scan_clearing: "Clearing...",
-  scan_save: "Save",
+  scan_save: "Complete",
 
   scan_missing_stockin_title: "Missing stock-in",
   scan_missing_stockin_message:
@@ -383,7 +385,73 @@ const en = {
 
   scan_remove_failed_title: "Remove failed",
   scan_remove_failed_message: "Unable to remove this parcel. Please try again.",
-  scan_stockin_code_label: "Stock In"
+  scan_stockin_code_label: "Stock In",
+
+  scan_volume: "Volume",
+
+  scan_missing_location_title: "Missing location",
+  scan_missing_location_message: "Please select a location before adding parcels.",
+  scan_completing: "Completing...",
+  scan_complete_failed_title: "Complete failed",
+  scan_complete_failed_message: "Unable to complete stock-in. Please try again.",
+  scan_update_location_failed_title: "Update Failed",
+  scan_update_location_failed_message: 'Unable to update location. Please try again',
+  common_status: "Status",
+  stock_view_refresh: "Refresh",
+  stock_view_unknown_location: "-",
+
+  stock_view_summary_format: "{count} parcels  •  {breakdown}",
+
+  stock_view_search_placeholder: "Search Parcels",
+
+  stock_view_search_hint_inside: "Searching inside",
+  stock_view_search_hint_locations: "Search will filter locations by matched items.",
+
+  stock_view_locations_title: "LOCATIONS",
+
+  stock_view_empty_locations: "No locations found.",
+  stock_view_empty_locations_matched: "No matched locations.",
+  stock_view_empty_items: "No items found.",
+
+  stock_view_location_matches: "{count} match",
+  stock_view_location_parcels: "{count} parcels",
+
+  stock_view_items_count: "{count} item(s)",
+  stock_view_items_showing: "{shown} of {total} item(s)",
+
+  stock_view_back: "Back",
+  stock_view_load_more: "Load more",
+
+  stock_view_boxes: "Boxes",
+  stock_view_dimension: "Dim (L×W×H)",
+  stock_view_material: "Material",
+  stock_view_qty: "Qty",
+  stock_view_amount: "Amount",
+  stock_view_unit_price: "Unit",
+  stock_view_amt_per_box: "Amt/Box",
+  stock_view_warehouse_date: "WH Date",
+  stock_view_remarks: "Remarks",
+
+
+  //pickup page
+  pickup_load_customer: "Load Customer",
+  pickup_scan_customer: "Scan Customer Code",
+  pickup_customer_placeholder: "Enter customer code",
+  pickup_parcels_title: "Parcels",
+  pickup_empty_hint: "Scan or search a customer above to view parcels.",
+  pickup_total_weight: "Total wt",
+  pickup_select_all: "Select All",
+  pickup_no_parcels: "No parcels found for this customer.",
+  pickup_pallet: "Pallet",
+  pickup_confirm: "Confirm Pickup",
+  pickup_scan_title: "Scan Customer Code",
+
+
+
+  scan_confirm_complete_title: "Complete",
+  scan_confirm_complete_message: "Once saved, you can't edit anymore",
+  scan_cancel: "Cancel",
+  scan_confirm: "Confirm"
 };
 
 export default en;

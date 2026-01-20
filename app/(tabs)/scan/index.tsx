@@ -12,11 +12,15 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, router } from "expo-router";
+import { useFocusEffect } from "@react-navigation/native";
+
 import { AppHeader } from "../../../components/AppHeader";
 import BasicCard from "../../../components/card/BasicCard";
 import SearchInput from "../../../components/input/SearchInput";
 import CustomButton from "../../../components/button/CustomButton";
 import { Picker } from "@react-native-picker/picker";
+import { useColorScheme } from "react-native";
+
 import {
   Barcode,
   Keyboard,
@@ -62,6 +66,7 @@ type ScannedParcel = {
   code: string; // normalized uppercase
   description: string;
   weightKg: number;
+  box_m3?: string | null;
   pallet: string; // loc_id string (optional / local)
   status?: string | null; // ✅ arranging
 };
@@ -80,9 +85,12 @@ type ApiStockinItem = {
   parcel_tracking?: string | null;
   gross_weight?: string | null;
   total_weight?: string | null;
+  box_m3?: string | null;
   status?: string | null;
   stockin_id?: number | null;
   stockin_item_id?: number | null;
+  loc_id?: number | null;
+  stockin_location?: number | null;
   items?: ApiParcelItem[];
 };
 
@@ -107,20 +115,52 @@ const PICKER_MIN_H = Platform.select({
 export default function ScanScreen() {
   const { t } = useLanguage();
 
-  const params = useLocalSearchParams<{ backTo?: string; stockinId?: string }>();
+  const params = useLocalSearchParams<{
+    backTo?: string;
+    stockinId?: string;
+    stockinCode?: string;
+  }>();
   const backTo = params.backTo as string | undefined;
   const stockinId = params.stockinId ? String(params.stockinId) : "";
+  const stockinParam = params.stockinCode ? String(params.stockinCode) : "";
+
+
 
   const [mode, setMode] = useState<ScanMode>("scan");
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
 
   // ✅ show stockin_code at top
   const [stockinCode, setStockinCode] = useState<string>("");
 
+  const headerTitle = stockinParam || stockinCode || stockinId || t("header_scan");
   // location selector stores location_id string (optional)
   const [pallet, setPallet] = useState<string>("");
 
   // locations list
   const [warehouseLocs, setWarehouseLocs] = useState<WarehouseLoc[]>([]);
+
+
+  const palletRef = useRef<string>("");
+  useEffect(() => {
+    palletRef.current = pallet;
+  }, [pallet]);
+
+  const warehouseLocsRef = useRef<WarehouseLoc[]>([]);
+  useEffect(() => {
+    warehouseLocsRef.current = warehouseLocs;
+  }, [warehouseLocs]);
+
+  const getEffectiveLocId = () => {
+    const p = String(palletRef.current || "").trim();
+    if (p) return p;
+
+    const list = warehouseLocsRef.current;
+    if (Array.isArray(list) && list.length > 0) return String(list[0].id);
+
+    return "";
+  };
+
   const [locLoading, setLocLoading] = useState(false);
 
   // manual input
@@ -158,6 +198,9 @@ export default function ScanScreen() {
   const [scanOpen, setScanOpen] = useState(false);
   const [scanBusy, setScanBusy] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
+  const [saving, setSaving] = useState(false);
+  const [confirmCompleteOpen, setConfirmCompleteOpen] = useState(false);
+
 
   // ✅ IMPORTANT FIX: when stockin changes on mobile tab screen, clear old state
   useEffect(() => {
@@ -285,6 +328,12 @@ export default function ScanScreen() {
     return firstDesc ? `${parcelNo} • ${firstDesc}` : parcelNo;
   };
 
+  const formatM3 = (v?: string | null) => {
+    const raw = (v ?? "").toString().trim();
+    const n = parseFloat(raw);
+    return Number.isFinite(n) ? n.toFixed(2) : "-";
+  };
+
   // ✅ shared fetch helper
   const fetchSafeArray = useCallback(
     async (url: string, body: any): Promise<ApiStockinItem[]> => {
@@ -316,7 +365,49 @@ export default function ScanScreen() {
     []
   );
 
-  // ✅ hydrate scanned list from server (arranging only) + stockin_code
+  const editItemLocation = async (
+    parcelId: number,
+    locationId: string
+  ): Promise<boolean> => {
+    try {
+      const payload = {
+        parcel_id: String(parcelId),
+        location_id: String(locationId),
+      };
+
+      console.log("[edit_item_location] payload:", payload);
+
+      const res = await authedFetch(
+        `${API_BASE_URL}/api/stock_in/edit_item_location`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      const text = await res.text().catch(() => "");
+      let data: any = null;
+      try {
+        data = text ? JSON.parse(text) : null;
+      } catch {
+        data = null;
+      }
+
+      if (!res.ok) {
+        console.log("edit_item_location error:", res.status, text || data);
+        return false;
+      }
+
+      return true;
+    } catch (e) {
+      console.log("edit_item_location exception:", e);
+      return false;
+    }
+  };
+
+
+  // ✅ hydrate scanned list from server + stockin_code
   const hydrateFromServer = useCallback(async () => {
     if (!stockinId) return;
 
@@ -347,12 +438,9 @@ export default function ScanScreen() {
 
       const items = Array.isArray(stockin.items) ? stockin.items : [];
 
-      // ✅ keep only arranging
-      const arranging = items.filter(
-        (it) => String(it.status || "").toLowerCase() === "arranging"
-      );
 
-      const next: ScannedParcel[] = arranging.map((it) => {
+      // ✅ no limit: include ALL items
+      const next: ScannedParcel[] = items.map((it) => {
         const code = normalizeUpper(getParcelCode(it));
         return {
           id: `srv_${it.id}`,
@@ -361,13 +449,17 @@ export default function ScanScreen() {
           code,
           description: getDescription(it),
           weightKg: getWeightKg(it),
-          pallet: pallet || "",
+          box_m3: it.box_m3 ?? null,
+          pallet:
+            it.stockin_location !== null && it.stockin_location !== undefined
+              ? String(it.stockin_location)
+              : "",
           status: it.status ?? null,
         };
       });
 
-      // ✅ IMPORTANT FIX: replace list (don’t merge old stockin items)
       setSelectedParcels(next);
+
     } catch (e) {
       console.log("view_stockin exception:", e);
     } finally {
@@ -379,6 +471,12 @@ export default function ScanScreen() {
     hydrateFromServer();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stockinId]);
+  // ✅ Mobile tabs keep screen mounted; refresh when coming back to this screen
+  useFocusEffect(
+    useCallback(() => {
+      hydrateFromServer();
+    }, [hydrateFromServer])
+  );
 
   const scannedCount = selectedParcels.length;
 
@@ -411,9 +509,10 @@ export default function ScanScreen() {
   }, [scannedCount, selectedParcels, selectedLocCode, locCodeById, t]);
 
   // remove already-added parcels from search results area
-  const selectedCodeSet = useMemo(() => {
-    return new Set(selectedParcels.map((p) => p.code.trim().toUpperCase()));
+  const selectedIdSet = useMemo(() => {
+    return new Set(selectedParcels.map((p) => p.apiItemId));
   }, [selectedParcels]);
+
 
   const addParcelToListLocalOnly = (payload: {
     apiItemId: number;
@@ -421,14 +520,14 @@ export default function ScanScreen() {
     code: string;
     description: string;
     weightKg: number;
+    box_m3?: string | null;
     pallet: string;
     status?: string | null;
   }) => {
-    const code = normalizeUpper(payload.code);
-    if (!code) return;
+    const code = normalizeUpper(payload.code); // can be same tracking, that's OK
 
     setSelectedParcels((prev) => {
-      if (prev.some((p) => p.code.trim().toUpperCase() === code)) {
+      if (prev.some((p) => p.apiItemId === payload.apiItemId)) {
         showError(
           (t("scan_duplicate_title") as string) || "Duplicate",
           (t("scan_duplicate_message") as string) ||
@@ -444,15 +543,16 @@ export default function ScanScreen() {
         code,
         description: payload.description,
         weightKg: payload.weightKg,
+        box_m3: payload.box_m3 ?? null,
         pallet: payload.pallet,
         status: payload.status ?? "arranging",
       };
 
       return [next, ...prev];
     });
+
   };
 
-  // insert item to stockin API
   const insertItemToStockIn = async (
     itemId: number
   ): Promise<{ ok: boolean; inserted?: any | null }> => {
@@ -465,6 +565,13 @@ export default function ScanScreen() {
       return { ok: false };
     }
 
+    const locId = getEffectiveLocId();
+
+    console.log("[insert_item_stockin] payload", {
+      stockin_id: stockinId,
+      item_id: String(itemId),
+      location_id: locId ? Number(locId) : null,
+    });
     try {
       const res = await authedFetch(
         `${API_BASE_URL}/api/stock_in/insert_item_stockin`,
@@ -473,6 +580,7 @@ export default function ScanScreen() {
           body: JSON.stringify({
             stockin_id: stockinId,
             item_id: String(itemId),
+            location_id: locId ? Number(locId) : null,
           }),
         }
       );
@@ -507,6 +615,7 @@ export default function ScanScreen() {
       return { ok: false };
     }
   };
+
 
   // remove item from stockin API
   const removeItemFromStockIn = async (itemId: number): Promise<boolean> => {
@@ -561,6 +670,62 @@ export default function ScanScreen() {
     }
   };
 
+  const completeStockIn = async (): Promise<boolean> => {
+    if (!stockinId) {
+      showError(
+        (t("scan_missing_stockin_title") as string) || "Missing stock-in",
+        (t("scan_missing_stockin_message") as string) ||
+        "stockin_id is missing. Please create Stock In first."
+      );
+      return false;
+    }
+
+    try {
+      const payload = { stockin_id: Number(stockinId) };
+
+      console.log("[complete_stockin] payload:", payload);
+
+      const res = await authedFetch(
+        `${API_BASE_URL}/api/stock_in/complete_stockin`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      const text = await res.text().catch(() => "");
+      let data: any = null;
+      try {
+        data = text ? JSON.parse(text) : null;
+      } catch {
+        data = null;
+      }
+
+      if (!res.ok) {
+        console.log("complete_stockin error:", res.status, text || data);
+
+        showError(
+          (t("scan_complete_failed_title") as string) || "Complete failed",
+          data?.message ||
+          (t("scan_complete_failed_message") as string) ||
+          "Unable to complete stock-in. Please try again."
+        );
+        return false;
+      }
+
+      return true;
+    } catch (e) {
+      console.log("complete_stockin exception:", e);
+      showError(
+        (t("scan_complete_failed_title") as string) || "Complete failed",
+        (t("scan_complete_failed_message") as string) ||
+        "Unable to complete stock-in. Please try again."
+      );
+      return false;
+    }
+  };
+
   // add single api parcel -> insert_item_stockin then add to UI
   const addApiParcel = async (x: ApiStockinItem) => {
     const key = String(x.id);
@@ -588,8 +753,8 @@ export default function ScanScreen() {
       code: getParcelCode(x),
       description: getDescription(x),
       weightKg: getWeightKg(x),
-      pallet: pallet || "",
-      status,
+      box_m3: x.box_m3 ?? null,
+      pallet: getEffectiveLocId(), status,
     });
   };
 
@@ -791,7 +956,6 @@ export default function ScanScreen() {
     await doSearch(manualValue);
   };
 
-  // ✅ Scan mode: open camera + scan
   const onPressScanBarcode = async () => {
     try {
       if (!permission?.granted) {
@@ -834,42 +998,66 @@ export default function ScanScreen() {
     }
   };
 
-  const onSave = () => {
+  const onSave = async () => {
+    if (saving) return;
+
     if (selectedParcels.length === 0) {
       showError(
         (t("scan_missing_title") as string) || "Missing items",
-        (t("scan_missing_message") as string) ||
-        "Please add at least one parcel."
+        (t("scan_missing_message") as string) || "Please add at least one parcel."
       );
       return;
     }
 
-    showSuccess(
-      (t("scan_saved_title") as string) || "Saved",
-      (t("scan_saved_message") as string) || "Stock-in updated.",
-      () => {
-        if (backTo) router.replace(backTo as any);
-        else router.replace("/stock");
-      }
-    );
+    setSaving(true);
+    try {
+      const ok = await completeStockIn();
+      if (!ok) return;
+
+      showSuccess(
+        (t("scan_saved_title") as string) || "Saved",
+        (t("scan_saved_message") as string) || "Stock-in updated.",
+        () => {
+          if (backTo) router.replace(backTo as any);
+          else router.replace("/stock");
+        }
+      );
+    } finally {
+      setSaving(false);
+    }
   };
+
+  const onPressComplete = () => {
+    if (saving) return;
+
+    if (selectedParcels.length === 0) {
+      showError(
+        (t("scan_missing_title") as string) || "Missing items",
+        (t("scan_missing_message") as string) || "Please add at least one parcel."
+      );
+      return;
+    }
+
+    setConfirmCompleteOpen(true);
+  };
+
 
   return (
     <SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
-      <AppHeader titleKey="header_scan" showBack backTo={backTo} />
+      <AppHeader titleKey={headerTitle} showBack backTo={backTo} />
 
       {/* ✅ TOP: Stockin Code */}
       <View style={styles.stockinBar}>
         {/* <Text style={styles.stockinBarLabel}>
           {(t("scan_stockin_code_label") as string) || "Stock In"}
         </Text> */}
-        <Text style={styles.stockinBarValue}>
+        {/* <Text style={styles.stockinBarValue}>
           {stockinCode || (stockinId ? `#${stockinId}` : "-")}
-        </Text>
+        </Text> */}
 
-        <View style={{ flex: 1 }} />
+        {/* <View style={{ flex: 1 }} /> */}
 
-        <TouchableOpacity
+        {/* <TouchableOpacity
           onPress={hydrateFromServer}
           activeOpacity={0.9}
           style={[styles.stockinBarRefresh, hydrating && { opacity: 0.6 }]}
@@ -882,7 +1070,7 @@ export default function ScanScreen() {
               {(t("scan_refresh") as string) || "Refresh"}
             </Text>
           )}
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
 
       <View style={styles.content}>
@@ -984,6 +1172,10 @@ export default function ScanScreen() {
                         setManualValue(v);
                         if (searchResult) setSearchResult(null);
                       }}
+                      onClear={() => {
+                        setManualValue("");
+                        if (searchResult) setSearchResult(null);
+                      }}
                       containerStyle={styles.searchBoxWrapper}
                       autoCorrect={false}
                       autoCapitalize="none"
@@ -1024,9 +1216,9 @@ export default function ScanScreen() {
                 ) : searchResult?.found === true ? (
                   (() => {
                     const remainingParcels = searchResult.parcels.filter((p) => {
-                      const code = normalizeUpper(getParcelCode(p));
-                      return !selectedCodeSet.has(code);
+                      return !selectedIdSet.has(p.id);
                     });
+
 
                     return (
                       <View style={styles.resultBox}>
@@ -1092,9 +1284,11 @@ export default function ScanScreen() {
                                       {desc}
                                     </Text>
                                     <Text style={styles.resultItemMeta}>
-                                      {(t("scan_weight") as string) || "Weight"}:{" "}
-                                      {w.toFixed(2)} kg
+                                      {(t("scan_weight") as string) || "Weight"}: {w.toFixed(2)} kg
+                                      {"  •  "}
+                                      {(t("scan_volume") as string) || "Volume"}: {formatM3(p.box_m3)} m³
                                     </Text>
+
                                   </View>
 
                                   <TouchableOpacity
@@ -1161,8 +1355,9 @@ export default function ScanScreen() {
                 <Picker
                   selectedValue={pallet}
                   onValueChange={(value) => setPallet(String(value))}
-                  style={styles.picker}
-                  dropdownIconColor="#9ca3af"
+                  style={[styles.locationPicker, isDark && styles.pickerDark]}
+                  itemStyle={isDark ? styles.pickerItemDark : styles.pickerItemLight}
+                  dropdownIconColor={isDark ? "#e5e7eb" : "#6b7280"}
                   enabled={warehouseLocs.length > 0}
                 >
                   {warehouseLocs.length === 0 ? (
@@ -1236,32 +1431,64 @@ export default function ScanScreen() {
                 return (
                   <View key={parcel.id} style={styles.itemRow}>
                     <View style={styles.parcelInfo}>
-                      <View style={styles.parcelTopLine}>
-                        <Text style={styles.parcelCode}>{parcel.code}</Text>
+                      {/* ✅ reserve space ONLY for top text so it won't go under trash button */}
+                      <View style={styles.parcelTextBlock}>
+                        <View style={styles.parcelTopLine}>
+                          <Text style={styles.parcelCode}>{parcel.code}</Text>
+                        </View>
 
-                        {/* <View style={styles.statusPill}>
-                          <Text style={styles.statusPillText}>
-                            {(parcel.status || "arranging").toString()}
-                          </Text>
-                        </View> */}
+                        <Text style={styles.parcelDesc}>{parcel.description}</Text>
+
+                        <Text style={styles.parcelMeta}>
+                          {(t("scan_weight") as string) || "Weight"}: {parcel.weightKg.toFixed(2)} kg
+                          {"  •  "}
+                          {(t("scan_volume") as string) || "Volume"}: {formatM3(parcel.box_m3)} m³
+                        </Text>
+
+                        {/* ✅ Status pill BELOW parcel detail */}
+                        <View style={styles.statusPillRow}>
+                          <View style={styles.statusPill}>
+                            <Text style={styles.statusPillText}>
+                              {(() => {
+                                const raw = (parcel.status || "").toString().trim();
+                                if (!raw) return "-";
+                                return raw.replace(/_/g, " ").toUpperCase();
+                              })()}
+                            </Text>
+                          </View>
+                        </View>
                       </View>
 
-                      <Text style={styles.parcelDesc}>{parcel.description}</Text>
-                      <Text style={styles.parcelMeta}>
-                        {(t("scan_weight") as string) || "Weight"}:{" "}
-                        {parcel.weightKg.toFixed(2)} kg
-                      </Text>
-
+                      {/* ✅ keep picker full width */}
                       <View style={styles.inlinePalletRow}>
                         <View style={styles.locationPill}>
                           <MapPin size={16} color="#6b7280" fill="#dde1e7ff" />
-
                           <View style={styles.locationPickerWrap}>
                             <Picker
                               selectedValue={parcel.pallet}
-                              onValueChange={(value) => updateParcelPallet(parcel.id, String(value))}
-                              style={styles.locationPicker}
-                              dropdownIconColor="#6b7280"
+                              onValueChange={async (value) => {
+                                const nextLocId = String(value);
+                                const prevLocId = parcel.pallet;
+
+                                // ✅ optimistic local update
+                                updateParcelPallet(parcel.id, nextLocId);
+
+                                // ✅ persist to backend
+                                const ok = await editItemLocation(parcel.apiItemId, nextLocId);
+                                if (!ok) {
+                                  // rollback UI
+                                  updateParcelPallet(parcel.id, prevLocId);
+
+                                  showError(
+                                    (t("scan_update_location_failed_title") as string) || "Update failed",
+                                    (t("scan_update_location_failed_message") as string) ||
+                                    "Unable to update location. Please try again."
+                                  );
+                                }
+                              }}
+                              style={[styles.locationPicker, isDark && styles.pickerDark]}
+                              itemStyle={isDark ? styles.pickerItemDark : styles.pickerItemLight}
+                              dropdownIconColor={isDark ? "#e5e7eb" : "#6b7280"}
                               enabled={warehouseLocs.length > 0}
                             >
                               {warehouseLocs.length === 0 ? (
@@ -1278,8 +1505,8 @@ export default function ScanScreen() {
                           </View>
                         </View>
                       </View>
-
                     </View>
+
 
                     {/* ✅ ABSOLUTE trash button so picker can stretch full width */}
                     <TouchableOpacity
@@ -1328,10 +1555,14 @@ export default function ScanScreen() {
             icon={SaveIcon}
             iconPosition="left"
             iconSize={16}
-            onPress={onSave}
+            onPress={onPressComplete}
+            disabled={saving}
           >
-            {(t("scan_save") as string) || "Save"}
+            {saving
+              ? (t("scan_completing") as string) || "Completing..."
+              : (t("scan_save") as string) || "Save"}
           </CustomButton>
+
         </View>
       </View>
 
@@ -1390,6 +1621,54 @@ export default function ScanScreen() {
         </SafeAreaView>
       </Modal>
 
+{/* ✅ Confirm complete dialog */}
+<Modal
+  visible={confirmCompleteOpen}
+  transparent
+  animationType="fade"
+  onRequestClose={() => setConfirmCompleteOpen(false)}
+>
+  <View style={styles.confirmBackdrop}>
+    <View style={styles.confirmCard}>
+      <Text style={styles.confirmTitle}>
+        {(t("scan_confirm_complete_title") as string) || "Confirm"}
+      </Text>
+
+      <Text style={styles.confirmMsg}>
+        {(t("scan_confirm_complete_message") as string) ||
+          "Once saved, you can't edit anymore."}
+      </Text>
+
+      <View style={styles.confirmActions}>
+        <TouchableOpacity
+          style={styles.confirmCancelBtn}
+          activeOpacity={0.9}
+          onPress={() => setConfirmCompleteOpen(false)}
+          disabled={saving}
+        >
+          <Text style={styles.confirmCancelText}>
+            {(t("scan_cancel") as string) || "Cancel"}
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.confirmOkBtn, saving && { opacity: 0.7 }]}
+          activeOpacity={0.9}
+          onPress={async () => {
+            setConfirmCompleteOpen(false);
+            await onSave(); // ✅ call complete route here
+          }}
+          disabled={saving}
+        >
+          <Text style={styles.confirmOkText}>
+            {(t("scan_confirm") as string) || "Confirm"}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  </View>
+</Modal>
+
       <MobileAlertDialog dialog={dialog} onClose={closeDialog} />
     </SafeAreaView>
   );
@@ -1433,7 +1712,12 @@ const styles = StyleSheet.create({
     color: "#374151",
   },
 
-  content: { flex: 1, paddingHorizontal: 16, paddingTop: 8, paddingBottom: 8 },
+  content: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingTop: 5,
+    paddingBottom: 8
+  },
   scrollContent: { paddingBottom: 90 },
 
   card: { marginBottom: 16 },
@@ -1661,6 +1945,13 @@ const styles = StyleSheet.create({
     marginBottom: 2,
     flex: 1,
   },
+
+  statusPillRow: {
+    marginTop: 8,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+
   statusPill: {
     paddingHorizontal: 10,
     paddingVertical: 4,
@@ -1668,19 +1959,32 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff7ed",
     borderWidth: 1,
     borderColor: "#fed7aa",
+    alignSelf: "flex-start", // ✅ keep pill compact, not full width
   },
-  statusPillText: { fontFamily: "Karla-Bold", fontSize: 11, color: "#9a3412" },
 
-  parcelDesc: { 
-    fontFamily: "Karla-Regular", 
-    fontSize: 12, 
-    color: "#6b7280" 
+  statusPillText: {
+    fontFamily: "Karla-Bold",
+    fontSize: 11,
+    color: "#9a3412",
   },
-  parcelMeta: { 
-    marginTop: 6, 
-    fontFamily: "Karla-Regular", 
-    fontSize: 12, 
-    color: "#9ca3af" },
+
+  parcelTextBlock: {
+    paddingRight: 44, // ✅ space for the 32px trash button + gaps
+  },
+
+  parcelDesc: {
+    fontFamily: "Karla-Regular",
+    fontSize: 12,
+    color: "#6b7280",
+    flexShrink: 1, // ✅ allow wrapping nicely
+  },
+
+  parcelMeta: {
+    marginTop: 6,
+    fontFamily: "Karla-Regular",
+    fontSize: 12,
+    color: "#9ca3af"
+  },
 
   inlinePalletRow: {
     marginTop: 10,
@@ -1841,4 +2145,80 @@ const styles = StyleSheet.create({
     color: "#ffffff",
     opacity: 0.9,
   },
+  pickerDark: {
+    color: "#111827", // ✅ forces visible text on Android picker
+  },
+
+  pickerItemDark: {
+    color: "#111827",
+    fontFamily: "Karla-Bold",
+    fontSize: 13,
+  },
+
+  pickerItemLight: {
+    color: "#111827",
+    fontFamily: "Karla-Bold",
+    fontSize: 13,
+  },
+  confirmBackdrop: {
+  flex: 1,
+  backgroundColor: "rgba(0,0,0,0.45)",
+  alignItems: "center",
+  justifyContent: "center",
+  padding: 20,
+},
+confirmCard: {
+  width: "100%",
+  maxWidth: 420,
+  backgroundColor: "#ffffff",
+  borderRadius: 16,
+  padding: 16,
+},
+confirmTitle: {
+  fontFamily: "Karla-ExtraBold",
+  fontSize: 14,
+  color: "#111827",
+},
+confirmMsg: {
+  marginTop: 8,
+  fontFamily: "Karla-Regular",
+  fontSize: 12,
+  color: "#6b7280",
+  lineHeight: 18,
+},
+confirmActions: {
+  flexDirection: "row",
+  gap: 10,
+  marginTop: 14,
+},
+confirmCancelBtn: {
+  flex: 1,
+  height: 42,
+  borderRadius: 12,
+  borderWidth: 1,
+  borderColor: "#e5e7eb",
+  alignItems: "center",
+  justifyContent: "center",
+  backgroundColor: "#ffffff",
+},
+confirmCancelText: {
+  fontFamily: "Karla-Bold",
+  fontSize: 12,
+  color: "#374151",
+},
+confirmOkBtn: {
+  flex: 1,
+  height: 42,
+  borderRadius: 12,
+  alignItems: "center",
+  justifyContent: "center",
+  backgroundColor: ORANGE,
+},
+confirmOkText: {
+  fontFamily: "Karla-ExtraBold",
+  fontSize: 12,
+  color: "#ffffff",
+},
+
+
 });

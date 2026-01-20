@@ -33,38 +33,37 @@ export default function MeScreen() {
 
   const user = MOCK_USER; // later: replace with real API data
 
-  const handleLogout = async () => {
-    if (loggingOut) return;
-    setLoggingOut(true);
+ const handleLogout = async () => {
+  if (loggingOut) return;
+  setLoggingOut(true);
 
+  try {
+    // ✅ Call logout using Bearer token (authedFetch attaches it)
+    const res = await authedFetch(`${API_BASE_URL}/api/auth/logout`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      // ❌ remove body (no hardcoded username/password)
+    });
+
+    // Optional: log/debug response
+    const text = await res.text().catch(() => "");
+    console.log("Logout status:", res.status, "body:", text);
+  } catch (e) {
+    console.log("Logout error:", e);
+  } finally {
     try {
-      await authedFetch(`${API_BASE_URL}/api/auth/logout`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          username: "admin",
-          password: "password123",
-        }),
-      });
+      await AsyncStorage.multiRemove(["authToken", "refreshToken", "currentUser"]);
     } catch (e) {
-      console.log("Logout error:", e);
-    } finally {
-      try {
-        await AsyncStorage.multiRemove([
-          "authToken",
-          "refreshToken",
-          "currentUser",
-        ]);
-      } catch (e) {
-        console.log("Failed clearing storage on logout:", e);
-      }
-
-      setLoggingOut(false);
-      router.replace("/login" as any);
+      console.log("Failed clearing storage on logout:", e);
     }
-  };
+
+    setLoggingOut(false);
+    router.replace("/login" as any);
+  }
+};
+
 
   const goProfile = () => {
     router.replace({

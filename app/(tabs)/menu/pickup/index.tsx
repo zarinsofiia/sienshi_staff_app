@@ -1,483 +1,306 @@
 // app/(tabs)/menu/pickup/index.tsx
-
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
   StyleSheet,
-  TextInput,
+  FlatList,
   TouchableOpacity,
-  ScrollView,
+  ListRenderItem,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
-import { useLocalSearchParams, router } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 
 import { AppHeader } from "../../../../components/AppHeader";
+import SearchInput from "../../../../components/input/SearchInput";
 import BasicCard from "../../../../components/card/BasicCard";
 import Button from "../../../../components/button/Button";
+import CustomButton from "../../../../components/button/CustomButton";
 
-const ORANGE = "#f59e0b";
+import { Plus, Eye } from "lucide-react-native";
 
-type ParcelItem = {
-  id: string;
-  tracking: string;
-  description: string;
-  qty: number;
-  weightKg: number;
-  pallet: string;
+const ORANGE = "#EE9328";
+const PAGE_SIZE = 10;
+
+type PickupRow = {
+  id: number;
+  pickup_code?: string | null;
+  customer_code?: string | null;
+  customer_name?: string | null;
+  date_completed?: string | null;
+  parcel_count?: number | null;
+  total_weight?: number | null;
+  total_m3?: number | null;
+
+  // future-proof:
+  fulfilment_method?: "pickup" | "delivery" | null;
 };
 
-const MOCK_CUSTOMER_CODE = "CUST-MARY";
+function formatDateTime(iso?: string | null) {
+  if (!iso) return "-";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "-";
+  return d.toLocaleString();
+}
 
-// 🔸 temp mock parcels for one customer
-const MOCK_PARCELS: ParcelItem[] = [
-  {
-    id: "1",
-    tracking: "MY551199003",
-    description: "Dresses · 2 qty",
-    qty: 2,
-    weightKg: 2.4,
-    pallet: "A",
-  },
-  {
-    id: "2",
-    tracking: "MY551189004",
-    description: "Scarves · 1 qty",
-    qty: 1,
-    weightKg: 0.6,
-    pallet: "A",
-  },
-];
-
-export default function PickupScreen() {
+export default function PickupHistoryScreen() {
   const params = useLocalSearchParams<{ backTo?: string }>();
   const backTo = params.backTo as string | undefined;
 
-  const [customerInput, setCustomerInput] = useState("");
-  const [activeCustomerCode, setActiveCustomerCode] = useState<string | null>(
-    null
+  const router = useRouter();
+
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+
+  // ✅ empty by default (no API yet, no mock)
+  const [rows, setRows] = useState<PickupRow[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => setPage(1), [search]);
+
+  // ✅ if backend returns mixed methods later, keep only pickup-completed here
+  const pickupOnly = useMemo(() => {
+    return rows.filter((r) => (r.fulfilment_method ?? "pickup") === "pickup");
+  }, [rows]);
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return pickupOnly;
+
+    return pickupOnly.filter((x) => {
+      const hay = [
+        x.pickup_code || "",
+        x.customer_code || "",
+        x.customer_name || "",
+        formatDateTime(x.date_completed),
+        String(x.id),
+      ]
+        .join(" ")
+        .toLowerCase();
+
+      return hay.includes(q);
+    });
+  }, [pickupOnly, search]);
+
+  const rowsToShow = useMemo(
+    () => filtered.slice(0, page * PAGE_SIZE),
+    [filtered, page]
   );
 
-  const [parcels, setParcels] = useState<ParcelItem[]>([]);
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
-
-  const hasCustomer = !!activeCustomerCode;
-
-  const totals = useMemo(() => {
-    const totalParcels = parcels.length;
-    const totalWeight = parcels.reduce((sum, p) => sum + p.weightKg, 0);
-    return { totalParcels, totalWeight };
-  }, [parcels]);
-
-  const isAllSelected =
-    parcels.length > 0 && selectedIds.length === parcels.length;
-
-  const handleLoadCustomer = () => {
-    const code = customerInput.trim();
-    if (!code) return;
-
-    // 🔸 later: call API with `code`
-    // for now, if matches mock code, show mock parcels; else empty
-    if (code.toUpperCase() === MOCK_CUSTOMER_CODE) {
-      setActiveCustomerCode(MOCK_CUSTOMER_CODE);
-      setParcels(MOCK_PARCELS);
-      setSelectedIds(MOCK_PARCELS.map((p) => p.id)); // default select all
-    } else {
-      setActiveCustomerCode(code.toUpperCase());
-      setParcels([]);
-      setSelectedIds([]);
-    }
+  const handleLoadMore = () => {
+    if (loading) return;
+    if (rowsToShow.length >= filtered.length) return;
+    setPage((prev) => prev + 1);
   };
 
-  const toggleParcel = (id: string) => {
-    setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+  const goToPickupView = useCallback(
+    (row: PickupRow) => {
+      const pickupCode = (row.pickup_code || `PU-${String(row.id).padStart(6, "0")}`).toString();
+
+      router.push({
+        pathname: "/menu/pickup/view",
+        params: {
+          backTo: "/menu/pickup",
+          pickupId: String(row.id),
+          pickupCode, // ✅ view page header will use this
+        },
+      });
+    },
+    [router]
+  );
+
+  const handleNewPickup = () => {
+    router.push({
+      pathname: "/menu/pickup/add", // ✅ your existing scan+confirm page
+      params: { backTo: "/menu/pickup" },
+    });
+  };
+
+  const renderItem: ListRenderItem<PickupRow> = ({ item }) => {
+    const code = (item.pickup_code || `PU-${String(item.id).padStart(6, "0")}`).toString();
+    const completed = formatDateTime(item.date_completed);
+
+    return (
+      <TouchableOpacity
+        activeOpacity={0.9}
+        onPress={() => goToPickupView(item)}
+        style={styles.cardPressWrap}
+      >
+        <BasicCard style={styles.card}>
+          <View style={styles.topRow}>
+            <View style={styles.leftBlock}>
+              <Text style={styles.title}>{code}</Text>
+
+              <Text style={styles.subText}>
+                Customer: {item.customer_code || "-"}{" "}
+                {item.customer_name ? `• ${item.customer_name}` : ""}
+              </Text>
+
+              <Text style={styles.subText}>Completed: {completed}</Text>
+
+              <Text style={styles.subText}>
+                Parcels: {item.parcel_count ?? "-"}
+                {"  •  "}Weight:{" "}
+                {typeof item.total_weight === "number"
+                  ? `${item.total_weight.toFixed(2)} kg`
+                  : "-"}
+                {"  •  "}m³:{" "}
+                {typeof item.total_m3 === "number"
+                  ? item.total_m3.toFixed(2)
+                  : "-"}
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.actionsRow}>
+            <CustomButton
+              preset="view"
+              style={styles.viewBtn}
+              icon={Eye}
+              iconPosition="left"
+              iconSize={14}
+              onPress={(e: any) => {
+                e?.stopPropagation?.();
+                goToPickupView(item);
+              }}
+            >
+              View
+            </CustomButton>
+          </View>
+        </BasicCard>
+      </TouchableOpacity>
     );
-  };
-
-  const handleToggleSelectAll = () => {
-    if (isAllSelected) {
-      setSelectedIds([]);
-    } else {
-      setSelectedIds(parcels.map((p) => p.id));
-    }
-  };
-
-  const handleConfirmPickup = () => {
-    if (selectedIds.length === 0) return;
-
-    // 🔸 later: call API to confirm pickup
-    console.log("Confirm pickup for", activeCustomerCode, "parcels:", selectedIds);
   };
 
   return (
     <SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
       <AppHeader titleKey="menu_pickup" showBack backTo={backTo} />
 
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* ========== SCAN / ENTER CUSTOMER ========== */}
-        <View style={styles.card}>
-          <Text style={styles.sectionLabel}>SCAN/ENTER CUSTOMER</Text>
-
+      <View style={styles.content}>
+        {/* Search + New button (same layout style as stock page) */}
+        <View style={styles.searchSection}>
           <View style={styles.searchRow}>
-            <View style={styles.inputWrapper}>
-              <Ionicons
-                name="person-outline"
-                size={16}
-                color="#fbbf24"
-                style={styles.inputIcon}
-              />
-              <TextInput
-                value={customerInput}
-                onChangeText={setCustomerInput}
-                placeholder="CUST-MARY"
-                placeholderTextColor="#FBBF24"
-                autoCapitalize="characters"
-                style={styles.input}
-                returnKeyType="search"
-                onSubmitEditing={handleLoadCustomer}
-              />
-            </View>
+            <SearchInput
+              label="SEARCH"
+              placeholder="Search pickup, customer, date..."
+              value={search}
+              onChangeText={setSearch}
+              onClear={() => setSearch("")}
+              containerStyle={styles.searchBoxWrapper}
+              autoCorrect={false}
+              autoCapitalize="none"
+            />
 
-            <TouchableOpacity
-              style={styles.scanButton}
-              activeOpacity={0.9}
-              onPress={() =>
-                router.push({
-                  pathname: "/scan",
-                  params: { backTo: "/menu/pickup" },
-                })
-              }
+            <Button
+              size="sm"
+              rounded="md"
+              variant="orange"
+              bgColor={ORANGE}
+              icon={Plus}
+              iconPosition="left"
+              style={styles.newButton}
+              textStyle={styles.newButtonText}
+              onPress={handleNewPickup}
             >
-              <Ionicons
-                name="qr-code-outline"
-                size={16}
-                color="#ffffff"
-                style={{ marginRight: 4 }}
-              />
-              <Text style={styles.scanButtonText}>Scan</Text>
-            </TouchableOpacity>
+              New
+            </Button>
           </View>
         </View>
 
-        {/* ========== CUSTOMER'S PARCELS ========== */}
-        <View style={styles.card}>
-          <View style={styles.parcelHeaderRow}>
-            <Text style={styles.sectionLabel}>CUSTOMER'S PARCELS</Text>
-
-            {hasCustomer && (
-              <View style={styles.customerChip}>
-                <Text style={styles.customerChipText}>
-                  {activeCustomerCode}
-                </Text>
-              </View>
-            )}
+        {loading ? (
+          <View style={styles.center}>
+            <ActivityIndicator size="small" color="#f59e0b" />
           </View>
-
-          {hasCustomer ? (
-            <>
-              {/* Summary row */}
-              <View style={styles.parcelSummaryRow}>
-                <View style={styles.parcelSummaryPill}>
-                  <Text style={styles.parcelSummaryText}>
-                    {totals.totalParcels} parcels
-                  </Text>
-                </View>
-                <View style={styles.parcelSummaryPill}>
-                  <Text style={styles.parcelSummaryText}>
-                    Total wt: {totals.totalWeight.toFixed(1)}kg
-                  </Text>
-                </View>
-
-                <TouchableOpacity
-                  style={styles.selectAllRow}
-                  onPress={handleToggleSelectAll}
-                  activeOpacity={0.8}
-                >
-                  <Ionicons
-                    name={
-                      isAllSelected ? "checkbox" : "square-outline"
-                    }
-                    size={16}
-                    color={ORANGE}
-                    style={{ marginRight: 4 }}
-                  />
-                  <Text style={styles.selectAllText}>Select All</Text>
-                </TouchableOpacity>
-              </View>
-
-              {/* Parcels list */}
-              {parcels.length === 0 ? (
-                <Text style={styles.emptyParcelsText}>
-                  No parcels found for this customer.
-                </Text>
-              ) : (
-                parcels.map((p) => {
-                  const checked = selectedIds.includes(p.id);
-                  return (
-                    <BasicCard
-                      key={p.id}
-                      style={styles.parcelCard}
-                    >
-                      <TouchableOpacity
-                        style={styles.parcelRow}
-                        activeOpacity={0.85}
-                        onPress={() => toggleParcel(p.id)}
-                      >
-                        <View style={styles.parcelLeft}>
-                          <View style={styles.checkboxCol}>
-                            <Ionicons
-                              name={
-                                checked ? "checkbox" : "square-outline"
-                              }
-                              size={18}
-                              color={ORANGE}
-                            />
-                          </View>
-
-                          <View style={styles.parcelTextCol}>
-                            <Text style={styles.parcelTracking}>
-                              {p.tracking}
-                            </Text>
-                            <Text style={styles.parcelDesc}>
-                              {p.description} · {p.weightKg}kg
-                            </Text>
-
-                            <View style={styles.palletPill}>
-                              <Ionicons
-                                name="location-outline"
-                                size={12}
-                                color="#166534"
-                                style={{ marginRight: 4 }}
-                              />
-                              <Text style={styles.palletText}>
-                                Pallet : {p.pallet}
-                              </Text>
-                            </View>
-                          </View>
-                        </View>
-                      </TouchableOpacity>
-                    </BasicCard>
-                  );
-                })
-              )}
-
-              {/* Confirm button row */}
-              <View style={styles.footerRow}>
-                <Button
-                  size="sm"
-                  rounded="full"
-                  bgColor="#22c55e"
-                  color="#ffffff"
-                  style={styles.confirmButton}
-                  onPress={handleConfirmPickup}
-                  disabled={selectedIds.length === 0}
-                >
-                  Confirm Pickup
-                </Button>
-              </View>
-            </>
-          ) : (
-            <Text style={styles.emptyParcelsText}>
-              Search or scan a customer above to view parcels.
-            </Text>
-          )}
-        </View>
-      </ScrollView>
+        ) : error ? (
+          <TouchableOpacity style={styles.center} activeOpacity={0.9}>
+            <Text style={styles.errorText}>{error}</Text>
+            <Text style={styles.retryText}>Tap to retry</Text>
+          </TouchableOpacity>
+        ) : (
+          <FlatList
+            data={rowsToShow}
+            keyExtractor={(item) => String(item.id)}
+            renderItem={renderItem}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={
+              filtered.length === 0 ? styles.emptyContainer : styles.listContent
+            }
+            ListEmptyComponent={
+              <Text style={styles.emptyText}>No pickup record found.</Text>
+            }
+            onEndReachedThreshold={0.5}
+            onEndReached={handleLoadMore}
+          />
+        )}
+      </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: {
+  safe: { flex: 1, backgroundColor: "#ffffff" },
+  content: {
     flex: 1,
-    backgroundColor: "#ffffffff",
-  },
-  scroll: {
-    flex: 1,
-  },
-  scrollContent: {
     paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 24,
+    paddingTop: 2,
+    paddingBottom: 16,
   },
 
-  /* Shared card */
-  card: {
-    backgroundColor: "#ffffffff",
-    borderRadius: 14,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: "#f2c44577",
-  },
+  searchSection: { marginTop: 8, marginBottom: 2 },
+  searchRow: { flexDirection: "row", alignItems: "center" },
+  searchBoxWrapper: { flex: 1, marginRight: 8 },
+  newButton: { height: 40, borderRadius: 10, paddingHorizontal: 16 },
+  newButtonText: { fontFamily: "Karla-Bold", fontSize: 12 },
 
-  sectionLabel: {
-    fontSize: 12,
-    fontFamily: "Karla-ExtraBold",
-    letterSpacing: 0.7,
-    color: "#111827",
-    marginBottom: 10,
-  },
-
-  /* Scan / enter customer */
-  searchRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  inputWrapper: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "#fde68a",
-    backgroundColor: "#ffffff",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  inputIcon: {
-    marginRight: 8,
-  },
-  input: {
-    flex: 1,
-    fontSize: 12,
+  center: { flex: 1, alignItems: "center", justifyContent: "center" },
+  errorText: {
+    fontSize: 13,
     fontFamily: "Karla-Regular",
-    color: "#000000ff",
-    paddingVertical: 0,
+    color: "#b91c1c",
+    marginBottom: 4,
   },
-  scanButton: {
-    marginLeft: 8,
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#EE9328",
-    borderRadius: 10,
-    paddingHorizontal: 16,
-    paddingVertical: 9,
-  },
-  scanButtonText: {
+  retryText: {
     fontSize: 12,
     fontFamily: "Karla-Bold",
-    color: "#ffffff",
-  },
-
-  /* Customer parcels header */
-  parcelHeaderRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  customerChip: {
-    marginLeft: "auto",
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: "#4b5563",
-    backgroundColor: "#f3f4f6",
-  },
-  customerChipText: {
-    fontSize: 11,
-    fontFamily: "Karla-Bold",
-    color: "#111827",
-  },
-
-  /* summary row */
-  parcelSummaryRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  parcelSummaryPill: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 999,
-    backgroundColor: "#f3f4f6",
-    marginRight: 8,
-  },
-  parcelSummaryText: {
-    fontSize: 11,
-    fontFamily: "Karla-Medium",
-    color: "#4b5563",
-  },
-  selectAllRow: {
-    marginLeft: "auto",
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  selectAllText: {
-    fontSize: 11,
-    fontFamily: "Karla-Medium",
     color: "#f97316",
   },
 
-  emptyParcelsText: {
-    marginTop: 6,
-    fontSize: 12,
-    fontFamily: "Karla-Regular",
-    color: "#9ca3af",
-  },
+  listContent: { paddingTop: 8, paddingBottom: 8 },
+  emptyContainer: { flexGrow: 1, alignItems: "center", justifyContent: "center" },
+  emptyText: { fontSize: 13, fontFamily: "Karla-Regular", color: "#9ca3af" },
 
-  /* parcel list */
-  parcelCard: {
-    marginTop: 8,
-    marginBottom: 4,
-  },
-  parcelRow: {
+  card: { marginBottom: 0 },
+  cardPressWrap: { marginBottom: 14 },
+
+  topRow: {
     flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    marginBottom: 10,
+    gap: 10,
   },
-  parcelLeft: {
-    flexDirection: "row",
-    flex: 1,
-  },
-  checkboxCol: {
-    justifyContent: "flex-start",
-    paddingTop: 4,
-    marginRight: 8,
-  },
-  parcelTextCol: {
-    flex: 1,
-  },
-  parcelTracking: {
-    fontSize: 12,
+  leftBlock: { flex: 1, paddingRight: 10 },
+  title: {
+    fontSize: 14,
     fontFamily: "Karla-ExtraBold",
     color: ORANGE,
-    marginBottom: 2,
+    letterSpacing: 0.3,
   },
-  parcelDesc: {
+  subText: {
+    marginTop: 6,
     fontSize: 11,
     fontFamily: "Karla-Regular",
     color: "#6b7280",
-    marginBottom: 6,
   },
-  palletPill: {
+
+  actionsRow: {
     flexDirection: "row",
+    justifyContent: "flex-end",
     alignItems: "center",
-    alignSelf: "flex-start",
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 999,
-    backgroundColor: "#dcfce7",
+    gap: 10,
+    flexWrap: "wrap",
   },
-  palletText: {
-    fontSize: 10,
-    fontFamily: "Karla-Bold",
-    color: "#166534",
-  },
-
-  /* footer */
-  footerRow: {
-    marginTop: 12,
-    alignItems: "flex-end",
-  },
-  confirmButton: {
-    minWidth: 150,
-  },
+  viewBtn: { paddingHorizontal: 14, paddingVertical: 10 },
 });
-

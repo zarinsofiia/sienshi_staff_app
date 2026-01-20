@@ -170,7 +170,7 @@ export default function TabsLayout() {
 
       {/* STOCK */}
       <Tabs.Screen
-        name="stock/index"
+        name="stock"
         options={{
           title: stockModule ? t(stockModule.label as any) : "",
           href: showStock ? undefined : null,
@@ -183,6 +183,12 @@ export default function TabsLayout() {
               />
             ) : null,
         }}
+          listeners={{
+    tabPress: (e) => {
+      e.preventDefault();
+      router.replace("/stock"); // ✅ always go stock root
+    },
+  }}
       />
 
       {/* ORDERS – only if backend returns { href: "/orders", ... } */}

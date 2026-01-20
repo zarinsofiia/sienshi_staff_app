@@ -19,7 +19,7 @@ import AsyncButton from "@/components/button/AsnycButton";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API_BASE_URL } from "../config/api";
 import MobileAlertDialog from "@/components/modal/MobileAlertDialog";
-
+import { registerPushTokens } from "../hooks/registerPush";
 type DialogType = "success" | "error";
 
 const ORANGE = "#f59e0b";
@@ -28,6 +28,7 @@ const WHITE = "#ffffffff";
 export default function LoginScreen() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const { t, lang, setLang } = useLanguage();
 
@@ -117,10 +118,25 @@ export default function LoginScreen() {
         console.log("Failed to save currentUser:", e);
       }
 
-      // 🔹 Apply backend preferred language if provided
-      const backendLang = data?.users?.pref_lang;
+      // try {
+      //   const push = await registerPushTokens();
+      //   console.log("PUSH TOKENS:", push);
+      // } catch (e) {
+      //   console.log("Failed to get push tokens:", e);
+      // }
+
+
+      // 🔹 Apply backend preferred language if provided (same behavior as desktop)
+      const backendLangRaw =
+        data?.lang ??
+        data?.user?.pref_lang ??
+        data?.user?.lang ??
+        data?.users?.pref_lang; // keep fallback if your backend really returns `users`
+
+      const backendLang = (backendLangRaw || "").toString().toLowerCase();
+
       if (backendLang === "en" || backendLang === "zh") {
-        setLang(backendLang);
+        setLang(backendLang as "en" | "zh"); // this will persist to AsyncStorage via your LanguageContext.setLang
       }
 
       // ✅ SUCCESS: no dialog, no toast — direct in
@@ -176,30 +192,40 @@ export default function LoginScreen() {
                     trimEnd
                   />
                 </View>
-
+     {/* PASSWORD */}
                 <View style={[styles.fieldGroup, { marginTop: 18 }]}>
                   <Input
                     label={t("login_password_label")}
                     labelStyle={styles.label}
                     placeholder={t("login_password_placeholder")}
                     placeholderTextColor="#9ca3af"
-                    secureTextEntry
+                    secureTextEntry={!showPassword} // ✅ toggle
                     autoCapitalize="none"
                     value={password}
                     onChangeText={setPassword}
                     returnKeyType="done"
                     uiSize="md"
                     leftIcon={
-                      <Ionicons
-                        name="lock-closed-outline"
-                        size={16}
-                        color="#9ca3af"
-                      />
+                      <Ionicons name="lock-closed-outline" size={16} color="#9ca3af" />
+                    }
+                    rightIcon={ // ✅ add this (if supported)
+                      <TouchableOpacity
+                        onPress={() => setShowPassword((v) => !v)}
+                        activeOpacity={0.7}
+                        style={styles.eyeBtn}
+                      >
+                        <Ionicons
+                          name={showPassword ? "eye-off-outline" : "eye-outline"}
+                          size={18}
+                          color="#9ca3af"
+                        />
+                      </TouchableOpacity>
                     }
                     containerStyle={styles.inputWrapper}
                     inputStyle={styles.input}
                   />
                 </View>
+
 
                 <TouchableOpacity style={styles.forgotWrapper}>
                   <Text style={styles.forgotText}>{t("login_forgot")}</Text>
@@ -328,6 +354,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
+  },
+   eyeBtn: {
+    paddingHorizontal: 6,
+    paddingVertical: 6,
   },
   langText: { fontSize: 12, color: "#9ca3af", fontFamily: "Karla-ExtraBold" },
   langActive: { color: ORANGE, fontFamily: "Karla-ExtraBold" },

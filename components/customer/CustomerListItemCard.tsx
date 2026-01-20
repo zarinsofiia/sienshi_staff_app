@@ -118,12 +118,17 @@ const CustomerListItemCard: React.FC<Props> = ({
       title={titleText}
       statusLabel={statusLabel}
       statusTone={statusTone}
+      onPress={() => {
+        if (!userId) return;
+        onView(userId); // ✅ same as view
+      }}
+      disabled={!userId}
       footer={
         <View style={styles.actionsRow}>
-          {/* View button */}
           <CustomButton
             preset="view"
-            onPress={() => {
+            onPress={(e: any) => {
+              e?.stopPropagation?.(); // ✅ prevent triggering card press
               if (!userId) return;
               onView(userId);
             }}
@@ -132,15 +137,13 @@ const CustomerListItemCard: React.FC<Props> = ({
             {t("customer_card_view")}
           </CustomButton>
 
-          {/* Approve button (only if pending) */}
           {isPending && (
             <CustomButton
               preset="approve"
               style={{ marginLeft: 8 }}
-              icon={(props) => (
-                <Ionicons name="checkmark-outline" {...props} />
-              )}
-              onPress={() => {
+              icon={(props) => <Ionicons name="checkmark-outline" {...props} />}
+              onPress={(e: any) => {
+                e?.stopPropagation?.(); // ✅ prevent triggering card press
                 if (!userId) return;
                 onApprove(userId, displayName);
               }}

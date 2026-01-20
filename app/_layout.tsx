@@ -29,19 +29,14 @@ export default function RootLayout() {
     );
   }
 
-  return (
+   return (
     <LanguageProvider>
-      {/* Fragment so Toast is a sibling of Stack */}
-      <>
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="login" />
-          <Stack.Screen name="(tabs)" />
-          {/* do NOT put <Toast /> here */}
-        </Stack>
-
-        {/* ✅ Global Toast host at root level */}
-        <Toast />
-      </>
+      <Stack screenOptions={{ headerShown: false }} initialRouteName="index">
+        <Stack.Screen name="index" />
+        <Stack.Screen name="login" />
+        <Stack.Screen name="(tabs)" />
+      </Stack>
+      <Toast />
     </LanguageProvider>
   );
 }

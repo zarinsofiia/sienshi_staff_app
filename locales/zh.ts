@@ -65,6 +65,8 @@ const zh = {
   header_menu: "操作菜单",
   header_scan: "扫描",
   header_stock: "库存",
+  header_stock_view: "查看库存",
+
   header_me: "用户信息",
   header_order: "订单",
 
@@ -312,7 +314,7 @@ const zh = {
   stock_delete_failed_message: "无法删除该入库单，请再试一次。",
   stock_delete_success_title: "已删除",
   stock_delete_success_message: "入库单已删除。",
-
+  stock_parcels: "包裹数",
   // ===========================================================================
   // SCAN (包裹扫描 / 手动搜索 / 相机)
   // ===========================================================================
@@ -372,7 +374,7 @@ const zh = {
 
   scan_clear_all: "清空全部",
   scan_clearing: "清空中...",
-  scan_save: "保存",
+  scan_save: "完成",
 
   scan_missing_stockin_title: "缺少入库单",
   scan_missing_stockin_message: "缺少 stockin_id，请先创建入库单。",
@@ -383,6 +385,69 @@ const zh = {
   scan_remove_failed_title: "移除失败",
   scan_remove_failed_message: "无法移除该包裹，请重试。",
   scan_stockin_code_label: "",
+  scan_volume: "体积",
+
+  scan_missing_location_title: "缺少位置",
+  scan_missing_location_message: "请先选择位置再添加包裹。",
+  scan_completing: "正在完成...",
+  scan_complete_failed_title: "完成失败",
+  scan_complete_failed_message: "无法完成入库操作，请再试一次。",
+  scan_update_location_failed_title: "更新失败",
+  scan_update_location_failed_message: "无法更新位置，请重试。",
+  common_status: "",
+
+  stock_view_refresh: "刷新",
+  stock_view_unknown_location: "-",
+
+  stock_view_summary_format: "{count} 票  •  {breakdown}",
+
+  stock_view_search_placeholder: "搜索包裹",
+
+  stock_view_search_hint_inside: "当前搜索库位",
+  stock_view_search_hint_locations: "搜索会根据匹配的包裹过滤库位。",
+
+  stock_view_locations_title: "库位",
+
+  stock_view_empty_locations: "没有库位。",
+  stock_view_empty_locations_matched: "没有匹配的库位。",
+  stock_view_empty_items: "没有匹配的包裹。",
+
+  stock_view_location_matches: "匹配 {count} 个",
+  stock_view_location_parcels: "{count} 票",
+
+  stock_view_items_count: "{count} 个",
+  stock_view_items_showing: "显示 {shown}/{total} 个",
+
+  stock_view_back: "返回",
+  stock_view_load_more: "加载更多",
+
+  stock_view_boxes: "箱数",
+  stock_view_dimension: "尺寸 (长×宽×高)",
+  stock_view_material: "材质",
+  stock_view_qty: "数量",
+  stock_view_amount: "金额",
+  stock_view_unit_price: "单价",
+  stock_view_amt_per_box: "每箱金额",
+  stock_view_warehouse_date: "入库日期",
+  stock_view_remarks: "备注",
+
+  //pickup
+  pickup_load_customer: "载入客户",
+  pickup_scan_customer: "扫描客户码",
+  pickup_customer_placeholder: "输入客户代码",
+  pickup_parcels_title: "包裹",
+  pickup_empty_hint: "请先在上方扫描或搜索客户以查看包裹。",
+  pickup_total_weight: "总重量",
+  pickup_select_all: "全选",
+  pickup_no_parcels: "此客户没有找到任何包裹。",
+  pickup_pallet: "货架",
+  pickup_confirm: "确认提货",
+  pickup_scan_title: "扫描客户码",
+  scan_confirm_complete_title: "完成",
+scan_confirm_complete_message: "一旦保存后，您将无法再编辑。",
+scan_cancel: "取消",
+scan_confirm: "确认",
+
 };
 
 export default zh;

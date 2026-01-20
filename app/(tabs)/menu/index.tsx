@@ -1,5 +1,5 @@
 // app/(tabs)/menu/index.tsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   View,
   StyleSheet,
@@ -50,6 +50,48 @@ const MenuSection: React.FC<{
 export default function MenuScreen() {
   const { t, lang } = useLanguage();
   const [sections, setSections] = useState<MenuSectionConfig[]>([]);
+  const createStockInAndGoScan = useCallback(async () => {
+    try {
+      const res = await authedFetch(
+        `${API_BASE_URL}/api/stock_in/create_stock_in`,
+        {
+          method: "POST",
+          body: JSON.stringify({}),
+        }
+      );
+
+      const text = await res.text().catch(() => "");
+      let data: any = null;
+      try {
+        data = text ? JSON.parse(text) : null;
+      } catch {
+        data = null;
+      }
+
+      if (!res.ok) {
+        console.log("create_stock_in error:", res.status, text || data);
+        return;
+      }
+
+      const stockinId =
+        data?.id ||
+        data?.stockin_id ||
+        data?.stock_in_id ||
+        data?.data?.id ||
+        data?.data?.stockin_id ||
+        null;
+
+      router.replace({
+        pathname: "/scan",
+        params: {
+          backTo: "/menu",
+          ...(stockinId ? { stockinId: String(stockinId) } : {}),
+        },
+      });
+    } catch (e) {
+      console.log("create_stock_in exception:", e);
+    }
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -93,16 +135,23 @@ export default function MenuScreen() {
                 icon,
                 onPress: href
                   ? () => {
-                      if (needsBackToMenu) {
-                        // 👇 this will give that screen backTo="/menu"
-                        router.replace({
-                          pathname: href as any,
-                          params: { backTo: "/menu" },
-                        });
-                      } else {
-                        router.replace(href as any);
+                    if (needsBackToMenu) {
+
+                      // ✅ Special case: Scan must create stock-in first
+                      if (href === "/scan") {
+                        createStockInAndGoScan();
+                        return;
                       }
+
+                      // 👇 this will give that screen backTo="/menu"
+                      router.replace({
+                        pathname: href as any,
+                        params: { backTo: "/menu" },
+                      });
+                    } else {
+                      router.replace(href as any);
                     }
+                  }
                   : undefined,
               };
             });
@@ -136,7 +185,7 @@ export default function MenuScreen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
-      <AppHeader titleKey="header_menu"  />
+      <AppHeader titleKey="header_menu" />
 
       <ScrollView
         contentContainerStyle={styles.scrollContent}

@@ -1,5 +1,5 @@
 // app/(tabs)/dashboard/AdminDashboard.tsx
-import React from "react";
+import React, { useState, useCallback } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -10,6 +10,9 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useLanguage } from "../../../contexts/LanguageContext";
+import { ActivityIndicator } from "react-native";
+import { authedFetch } from "../../../config/mobileApiClient";
+import { API_BASE_URL } from "../../../config/api";
 
 const ORANGE = "#EE9328";
 
@@ -20,6 +23,57 @@ interface AdminDashboardProps {
 const AdminDashboard: React.FC<AdminDashboardProps> = ({ displayName }) => {
   const router = useRouter();
   const { t } = useLanguage();
+
+  const [creatingStockIn, setCreatingStockIn] = useState(false);
+
+  const handleScan = useCallback(async () => {
+    if (creatingStockIn) return;
+
+    setCreatingStockIn(true);
+    try {
+      const res = await authedFetch(
+        `${API_BASE_URL}/api/stock_in/create_stock_in`,
+        {
+          method: "POST",
+          body: JSON.stringify({}),
+        }
+      );
+
+      const text = await res.text().catch(() => "");
+      let data: any = null;
+      try {
+        data = text ? JSON.parse(text) : null;
+      } catch {
+        data = null;
+      }
+
+      if (!res.ok) {
+        console.log("create_stock_in error:", res.status, text || data);
+        return;
+      }
+
+      const stockinId =
+        data?.id ||
+        data?.stockin_id ||
+        data?.stock_in_id ||
+        data?.data?.id ||
+        data?.data?.stockin_id ||
+        null;
+
+      router.push({
+        pathname: "/scan",
+        params: {
+          backTo: "/dashboard",
+          ...(stockinId ? { stockinId: String(stockinId) } : {}),
+        },
+      });
+    } catch (e) {
+      console.log("create_stock_in exception:", e);
+    } finally {
+      setCreatingStockIn(false);
+    }
+  }, [creatingStockIn, router]);
+
 
   const welcomeTitle = (t("staff_dashboard_welcome") || "Welcome, {name}!")
     .replace("{name}", displayName || (t("staff_dashboard_default_admin") || "Admin"));
@@ -40,14 +94,14 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ displayName }) => {
 
         <TouchableOpacity
           style={styles.scanButton}
-          onPress={() =>
-            router.push({
-              pathname: "/scan",
-              params: { backTo: "/dashboard" },
-            })
-          }
+          onPress={handleScan}
+          disabled={creatingStockIn}
         >
-          <Ionicons name="qr-code-outline" size={18} color="#ffffff" />
+          {creatingStockIn ? (
+            <ActivityIndicator size="small" color="#ffffff" />
+          ) : (
+            <Ionicons name="qr-code-outline" size={18} color="#ffffff" />
+          )}
           <Text style={styles.scanButtonText}>
             {t("staff_dashboard_scan") || "Scan"}
           </Text>

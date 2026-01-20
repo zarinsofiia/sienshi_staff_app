@@ -262,6 +262,7 @@ export default function CustomerListScreen() {
           placeholder={t("customer_search_placeholder") ?? "Search"}
           value={search}
           onChangeText={setSearch}
+          onClear={() => setSearch("")}
           autoCorrect={false}
           autoCapitalize="none"
         />

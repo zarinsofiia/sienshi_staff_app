@@ -1,4 +1,5 @@
 // app/(tabs)/dashboard/DriverDashboard.tsx
+import { Pencil } from "lucide-react-native";
 import React from "react";
 import {
   ScrollView,
@@ -7,7 +8,6 @@ import {
   View,
 } from "react-native";
 import CustomButton from "../../../components/button/CustomButton";
-import { Pencil } from "lucide-react-native";
 import { useLanguage } from "../../../contexts/LanguageContext";
 
 interface DriverDashboardProps {
@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
     borderColor: "#fde68a",
   },
   summaryTitle: {
-    fontSize: 11,
+    fontSize: 13,
     fontFamily: "Karla-ExtraBold",
     color: ORANGE,
     marginBottom: 4,
@@ -201,7 +201,7 @@ const styles = StyleSheet.create({
   },
   summarySubtitle: {
     marginTop: 2,
-    fontSize: 11,
+    fontSize: 13,
     fontFamily: "Karla-Regular",
     color: "#6b7280",
   },
@@ -289,7 +289,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   statusChipText: {
-    fontSize: 10,
+    fontSize: 13,
     fontFamily: "Karla-Bold",
   },
   statusChipOut: {

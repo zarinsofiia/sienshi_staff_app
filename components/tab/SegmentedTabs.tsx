@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
     backgroundColor: ORANGE,
   },
   tabText: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: "Karla-ExtraBold",
     textTransform: "uppercase",
     color: "#E89923",        // inactive text colour

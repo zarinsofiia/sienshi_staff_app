@@ -4,11 +4,11 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { AppHeader } from "../../../components/AppHeader";
@@ -351,7 +351,7 @@ const styles = StyleSheet.create({
   },
   searchPlaceholder: {
     marginLeft: 8,
-    fontSize: 12,
+    fontSize: 13,
     color: ORANGE,
   },
   scanButton: {
@@ -366,7 +366,7 @@ const styles = StyleSheet.create({
   scanButtonText: {
     color: "#ffffff",
     fontWeight: "700",
-    fontSize: 12,
+    fontSize: 13,
     marginLeft: 4,
   },
   statsGrid: {
@@ -483,7 +483,7 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   activityTitle: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: "Karla-ExtraBold",
     color: ORANGE,
   },

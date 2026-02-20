@@ -1,20 +1,20 @@
 // app/(tabs)/me/settings.tsx
 
+import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-  View,
-  Text,
+  ActivityIndicator,
   StyleSheet,
   Switch,
+  Text,
   TouchableOpacity,
-  ActivityIndicator,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter, useLocalSearchParams } from "expo-router";
 import { AppHeader } from "../../../components/AppHeader";
 import { DetailSectionCard } from "../../../components/card/DetailSectionCard";
-import { useLanguage } from "../../../contexts/LanguageContext";
 import MobileAlertDialog from "../../../components/modal/MobileAlertDialog";
+import { useLanguage } from "../../../contexts/LanguageContext";
 
 type DialogType = "success" | "error";
 
@@ -201,7 +201,7 @@ const styles = StyleSheet.create({
     color: "#111827",
   },
   rowSubtitle: {
-    fontSize: 11,
+    fontSize: 13,
     fontFamily: "Karla-Regular",
     color: "#6b7280",
     marginTop: 2,
@@ -228,7 +228,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff7ed",
   },
   langPillText: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: "Karla-Bold",
     color: "#6b7280",
   },

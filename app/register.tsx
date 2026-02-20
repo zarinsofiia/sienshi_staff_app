@@ -1,18 +1,18 @@
 // app/register.tsx
+import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import React, { useState } from "react";
 import {
-    View,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    StyleSheet,
     Text,
     TextInput,
     TouchableOpacity,
-    StyleSheet,
-    ScrollView,
-    KeyboardAvoidingView,
-    Platform,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
 import { useLanguage } from "../contexts/LanguageContext";
 
 const ORANGE = "#f59e0b";
@@ -315,7 +315,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     langText: {
-        fontSize: 12,
+        fontSize: 13,
         color: "#9ca3af",
         fontFamily: "Karla-ExtraBold",
     },
@@ -324,7 +324,7 @@ const styles = StyleSheet.create({
         fontFamily: "Karla-ExtraBold",
     },
     langSeparator: {
-        fontSize: 12,
+        fontSize: 13,
         color: "#9ca3af",
         marginHorizontal: 6,
     },

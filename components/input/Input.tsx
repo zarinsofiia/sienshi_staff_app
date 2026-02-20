@@ -2,14 +2,14 @@
 import { AlertCircle, CheckCircle } from 'lucide-react-native';
 import React, { forwardRef, useEffect, useState } from 'react';
 import {
-  StyleProp,
-  StyleSheet,
-  Text,
-  TextInput,
-  TextInputProps,
-  TextStyle,
-  View,
-  ViewStyle,
+    StyleProp,
+    StyleSheet,
+    Text,
+    TextInput,
+    TextInputProps,
+    TextStyle,
+    View,
+    ViewStyle,
 } from 'react-native';
 
 interface ValidationRules {
@@ -316,12 +316,12 @@ const styles = StyleSheet.create({
     marginRight: 4,
   },
   errorText: {
-    fontSize: 12,
+    fontSize: 13,
     color: '#dc2626',
   },
   helperText: {
     marginTop: 4,
-    fontSize: 12,
+    fontSize: 13,
     color: '#9ca3af',
   },
 });

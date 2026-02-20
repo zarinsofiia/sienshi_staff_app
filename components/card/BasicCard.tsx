@@ -21,7 +21,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "#ffdd81ff", // very light yellow
+    borderColor: "#fde68a", // very light yellow
     paddingHorizontal: 12,
     paddingVertical: 10,
   

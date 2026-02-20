@@ -55,7 +55,12 @@ export default function DashboardScreen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
-      <AppHeader titleKey="header_dashboard" showNotification />
+      <AppHeader 
+      titleKey="header_dashboard" 
+      showNotification 
+      notificationCount={3} 
+       leftLogo={require("../../../assets/images/sienshi_logo.jpg")}
+      />
 
       {loading ? (
         <View style={styles.center}>

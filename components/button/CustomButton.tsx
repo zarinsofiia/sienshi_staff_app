@@ -32,8 +32,8 @@ const CustomButton: React.FC<CustomButtonProps> = ({
             borderColor = "#facc15";
             break;
         case "approve":
-            bgColor = "#22c55e33";      // soft green background
-            textColor = "#14532d";      // dark green text
+            bgColor = "#36cc6dab";      // soft green background
+            textColor = "#04160b";      // dark green text
             borderColor = "#16a34a";    // medium green border
             break;
 
@@ -70,7 +70,7 @@ const CustomButton: React.FC<CustomButtonProps> = ({
             style={[
                 {
                     paddingHorizontal: 16,
-                    paddingVertical: 6,
+                    paddingVertical: 12,
                     borderRadius: 999,
                     borderWidth: borderColor ? 1 : 0,
                     borderColor: borderColor,
@@ -80,7 +80,7 @@ const CustomButton: React.FC<CustomButtonProps> = ({
             ]}
             textStyle={[
                 {
-                    fontSize: 12,
+                    fontSize: 14,
                     fontFamily: "Karla-Bold",
                 },
                 textStyle,

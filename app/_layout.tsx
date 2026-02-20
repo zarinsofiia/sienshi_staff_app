@@ -1,7 +1,9 @@
 // app/_layout.tsx
+import "react-native-gesture-handler";
 import React from "react";
 import { Stack } from "expo-router";
 import { View, ActivityIndicator } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import {
   useFonts,
   Karla_400Regular,
@@ -21,7 +23,6 @@ export default function RootLayout() {
   });
 
   if (!fontsLoaded) {
-    // simple loading screen while fonts are loading
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator />
@@ -29,14 +30,16 @@ export default function RootLayout() {
     );
   }
 
-   return (
-    <LanguageProvider>
-      <Stack screenOptions={{ headerShown: false }} initialRouteName="index">
-        <Stack.Screen name="index" />
-        <Stack.Screen name="login" />
-        <Stack.Screen name="(tabs)" />
-      </Stack>
-      <Toast />
-    </LanguageProvider>
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <LanguageProvider>
+        <Stack screenOptions={{ headerShown: false }} initialRouteName="index">
+          <Stack.Screen name="index" />
+          <Stack.Screen name="login" />
+          <Stack.Screen name="(tabs)" />
+        </Stack>
+        <Toast />
+      </LanguageProvider>
+    </GestureHandlerRootView>
   );
 }

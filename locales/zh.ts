@@ -53,7 +53,8 @@ const zh = {
   // ===========================================================================
   home: "首页",
   menu: "操作菜单",
-  scan: "扫描",
+  // scan: "扫描",
+  scan: "入库扫描",
   stock: "库存",
   profile: "我的",
   tab_order: "订单",
@@ -66,7 +67,6 @@ const zh = {
   header_scan: "扫描",
   header_stock: "库存",
   header_stock_view: "查看库存",
-
   header_me: "用户信息",
   header_order: "订单",
 
@@ -315,6 +315,7 @@ const zh = {
   stock_delete_success_title: "已删除",
   stock_delete_success_message: "入库单已删除。",
   stock_parcels: "包裹数",
+
   // ===========================================================================
   // SCAN (包裹扫描 / 手动搜索 / 相机)
   // ===========================================================================
@@ -326,7 +327,6 @@ const zh = {
   scan_scan_title: "扫描",
   scan_scan_not_ready: "条码扫描尚未集成。",
 
-  // ✅ NEW (camera flow)
   scan_scan_hint: "对准条码即可自动搜索。",
   scan_camera_denied_title: "相机权限",
   scan_camera_denied_message: "请允许相机权限以扫描条码。",
@@ -384,7 +384,9 @@ const zh = {
 
   scan_remove_failed_title: "移除失败",
   scan_remove_failed_message: "无法移除该包裹，请重试。",
-  scan_stockin_code_label: "",
+
+  scan_stockin_code_label: "入库单",
+
   scan_volume: "体积",
 
   scan_missing_location_title: "缺少位置",
@@ -394,13 +396,13 @@ const zh = {
   scan_complete_failed_message: "无法完成入库操作，请再试一次。",
   scan_update_location_failed_title: "更新失败",
   scan_update_location_failed_message: "无法更新位置，请重试。",
-  common_status: "",
+
+  common_status: "状态",
 
   stock_view_refresh: "刷新",
   stock_view_unknown_location: "-",
 
   stock_view_summary_format: "{count} 票  •  {breakdown}",
-
   stock_view_search_placeholder: "搜索包裹",
 
   stock_view_search_hint_inside: "当前搜索库位",
@@ -431,7 +433,9 @@ const zh = {
   stock_view_warehouse_date: "入库日期",
   stock_view_remarks: "备注",
 
-  //pickup
+  // ===========================================================================
+  // PICKUP
+  // ===========================================================================
   pickup_load_customer: "载入客户",
   pickup_scan_customer: "扫描客户码",
   pickup_customer_placeholder: "输入客户代码",
@@ -443,11 +447,52 @@ const zh = {
   pickup_pallet: "货架",
   pickup_confirm: "确认提货",
   pickup_scan_title: "扫描客户码",
-  scan_confirm_complete_title: "完成",
-scan_confirm_complete_message: "一旦保存后，您将无法再编辑。",
-scan_cancel: "取消",
-scan_confirm: "确认",
 
+  scan_confirm_complete_title: "完成",
+  scan_confirm_complete_message: "一旦保存后，您将无法再编辑。",
+  scan_cancel: "取消",
+  scan_confirm: "确认",
+
+  common_updated: "已更新",
+  header_stock_in: "入库",
+  pickup_completed_message: "提货已完成。",
+
+  header_assigned_do: "已分配交货单",
+  stock_stocked_in: "已入库",
+  stock_tab_pending: "待处理",
+  stock_tab_completed: "已完成",
+
+  common_manifest: "舱单管理",
+
+  scan_unassigned: "未分配",
+  scan_loading_locations: "加载中…",
+  common_hide: "隐藏",
+  common_page: "页",
+  common_prev: "上一页",
+  common_next: "下一页",
+  common_showing: "显示",
+  common_results: "条结果",
+  common_no_results: "无结果",
+  scan_customer: "客户",
+  scan_search_scanned_label: "搜索已扫描",
+  scan_search_scanned_placeholder: "搜索编号或描述",
+  scan_showing: "显示",
+  scan_of: "共",
+  scan_no_match: "没有匹配的包裹",
+  scan_grouped_by_location: "按位置分组（点击标题可折叠/展开）。",
+
+  pickup_no_selection_title: "未选择",
+  pickup_no_selection_message: "请至少选择一个包裹",
+  pickup_failed_title: "提货失败",
+  pickup_invalid_customer_code: "客户代码无效",
+
+  search: "搜索",
+  scan_search_location: "搜索位置",
+  scan_close: "关闭",
+
+  assigned_do: "已分配交货单",
+
+  stock_selected: "已选择",
 };
 
 export default zh;

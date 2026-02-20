@@ -1,30 +1,32 @@
 // app/(tabs)/menu/packing/create.tsx
 
+import { useLocalSearchParams } from "expo-router";
+import {
+  FileText,
+  Plus,
+  Save as SaveIcon,
+  Search,
+  Trash2,
+  Truck as TruckIcon,
+} from "lucide-react-native";
 import React, { useMemo, useState } from "react";
 import {
-  View,
-  StyleSheet,
+  Alert,
   ScrollView,
+  StyleSheet,
   Text,
   TouchableOpacity,
-  Alert,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useLocalSearchParams } from "expo-router";
+
 import { AppHeader } from "../../../../components/AppHeader";
-import BasicCard from "../../../../components/card/BasicCard";
 import CustomButton from "../../../../components/button/CustomButton";
+import BasicCard from "../../../../components/card/BasicCard";
 import SearchInput from "../../../../components/input/SearchInput";
-import { Picker } from '@react-native-picker/picker';
-import {
-  Search,
-  FileText,
-  Truck as TruckIcon,
-  Trash2,
-  Plus,
-  ChevronDown,
-  Save as SaveIcon,
-} from "lucide-react-native";
+import GeneralPickerModal, {
+  PickerOption,
+} from "../../../../components/modal/GeneralModalPicker";
 
 const ORANGE = "#EE9328";
 
@@ -51,14 +53,31 @@ const MOCK_PARCELS: ParcelCandidate[] = [
   },
 ];
 
+// ✅ Picker options (readonly) — works with your GeneralPickerModal props
+const VEHICLE_OPTIONS = [
+  { label: "Clear selection", value: "" },
+  { label: "TRK-01", value: "TRK-01" },
+  { label: "TRK-02", value: "TRK-02" },
+] as const satisfies readonly PickerOption[];
+
+const DRIVER_OPTIONS = [
+  { label: "Clear selection", value: "" },
+  { label: "Driver A", value: "Driver A" },
+  { label: "Driver B", value: "Driver B" },
+] as const satisfies readonly PickerOption[];
+
 export default function PackingCreateScreen() {
   const params = useLocalSearchParams<{ backTo?: string }>();
   const backTo = params.backTo as string | undefined;
 
   const [searchValue, setSearchValue] = useState("");
   const [selectedParcels, setSelectedParcels] = useState<ParcelCandidate[]>([]);
+
   const [selectedVehicle, setSelectedVehicle] = useState<string | null>(null);
   const [selectedDriver, setSelectedDriver] = useState<string | null>(null);
+
+  const [vehiclePickerOpen, setVehiclePickerOpen] = useState(false);
+  const [driverPickerOpen, setDriverPickerOpen] = useState(false);
 
   // 🔹 Filter mock parcels by search term
   const searchResults = useMemo(() => {
@@ -73,7 +92,6 @@ export default function PackingCreateScreen() {
 
   const handleAddParcel = (parcel: ParcelCandidate) => {
     setSelectedParcels((prev) => {
-      // avoid duplicates by code
       if (prev.some((p) => p.code === parcel.code)) return prev;
       return [...prev, parcel];
     });
@@ -83,23 +101,12 @@ export default function PackingCreateScreen() {
     setSelectedParcels((prev) => prev.filter((p) => p.code !== code));
   };
 
-  const handleClearAll = () => {
-    setSelectedParcels([]);
-  };
+  const handleClearAll = () => setSelectedParcels([]);
 
   const totalWeight = useMemo(
     () => selectedParcels.reduce((sum, p) => sum + p.weightKg, 0),
     [selectedParcels]
   );
-
-  const handleSelectVehicle = () => {
-    // simple placeholder: toggle example value (replace with real picker later)
-    setSelectedVehicle((prev) => (prev ? null : "TRK-01"));
-  };
-
-  const handleSelectDriver = () => {
-    setSelectedDriver((prev) => (prev ? null : "Driver A"));
-  };
 
   const handleSave = () => {
     if (selectedParcels.length === 0) {
@@ -111,7 +118,6 @@ export default function PackingCreateScreen() {
       return;
     }
 
-    // TODO: hook to your API
     console.log("Saving packing list:", {
       parcels: selectedParcels,
       vehicle: selectedVehicle,
@@ -138,7 +144,7 @@ export default function PackingCreateScreen() {
             </View>
 
             <SearchInput
-              label="" // header already has the label
+              label=""
               value={searchValue}
               onChangeText={setSearchValue}
               placeholder="ABC-12345-S-BL"
@@ -147,7 +153,6 @@ export default function PackingCreateScreen() {
               autoCorrect={false}
             />
 
-            {/* Search results (tap to add) */}
             {searchResults.map((parcel) => (
               <TouchableOpacity
                 key={parcel.id}
@@ -189,21 +194,19 @@ export default function PackingCreateScreen() {
                   <View key={parcel.code} style={styles.itemRow}>
                     <View style={styles.parcelInfo}>
                       <Text style={styles.parcelCode}>{parcel.code}</Text>
-                      <Text style={styles.parcelDesc}>
-                        {parcel.description}
-                      </Text>
+                      <Text style={styles.parcelDesc}>{parcel.description}</Text>
                     </View>
 
                     <TouchableOpacity
                       style={styles.trashButton}
                       onPress={() => handleRemoveParcel(parcel.code)}
+                      activeOpacity={0.9}
                     >
                       <Trash2 size={16} color={ORANGE} />
                     </TouchableOpacity>
                   </View>
                 ))}
 
-                {/* Summary row */}
                 <View style={styles.summaryRow}>
                   <Text style={styles.summaryText}>
                     Total Weight (kg) : {totalWeight.toFixed(1)}
@@ -213,14 +216,10 @@ export default function PackingCreateScreen() {
                   </Text>
                 </View>
 
-                {/* Clear all row */}
                 <View style={styles.clearAllRow}>
-                  <TouchableOpacity
-                    style={styles.clearAllButton}
-                    onPress={handleClearAll}
-                  >
-                    <Text style={styles.clearAllText}>Clear All</Text>
-                  </TouchableOpacity>
+                  <CustomButton preset="danger" onPress={handleClearAll}>
+                    Clear All
+                  </CustomButton>
                 </View>
               </>
             )}
@@ -234,49 +233,32 @@ export default function PackingCreateScreen() {
             </View>
 
             <View style={styles.assignRow}>
-              {/* Vehicle picker */}
-              <View style={styles.dropdown}>
-                <Picker
-                  selectedValue={selectedVehicle ?? ""}
-                  onValueChange={(value) => {
-                    if (value === "") {
-                      setSelectedVehicle(null);
-                    } else {
-                      setSelectedVehicle(String(value));
-                    }
-                  }}
-                  style={styles.picker}
-                  dropdownIconColor="#9ca3af"
+              <View style={{ flex: 1 }}>
+                <Text style={styles.assignLabel}>Vehicle</Text>
+                <TouchableOpacity
+                  activeOpacity={0.9}
+                  style={styles.selectBox}
+                  onPress={() => setVehiclePickerOpen(true)}
                 >
-                  <Picker.Item label="Select Vehicle" value="" />
-                  <Picker.Item label="TRK-01" value="TRK-01" />
-                  <Picker.Item label="TRK-02" value="TRK-02" />
-                  {/* later: map real vehicles from API */}
-                </Picker>
+                  <Text style={styles.selectText}>
+                    {selectedVehicle || "Select Vehicle"}
+                  </Text>
+                </TouchableOpacity>
               </View>
 
-              {/* Driver picker */}
-              <View style={styles.dropdown}>
-                <Picker
-                  selectedValue={selectedDriver ?? ""}
-                  onValueChange={(value) => {
-                    if (value === "") {
-                      setSelectedDriver(null);
-                    } else {
-                      setSelectedDriver(String(value));
-                    }
-                  }}
-                  style={styles.picker}
-                  dropdownIconColor="#9ca3af"
+              <View style={{ flex: 1 }}>
+                <Text style={styles.assignLabel}>Driver</Text>
+                <TouchableOpacity
+                  activeOpacity={0.9}
+                  style={styles.selectBox}
+                  onPress={() => setDriverPickerOpen(true)}
                 >
-                  <Picker.Item label="Select Driver" value="" />
-                  <Picker.Item label="Driver A" value="Driver A" />
-                  <Picker.Item label="Driver B" value="Driver B" />
-                  {/* later: real drivers here */}
-                </Picker>
+                  <Text style={styles.selectText}>
+                    {selectedDriver || "Select Driver"}
+                  </Text>
+                </TouchableOpacity>
               </View>
             </View>
-
           </BasicCard>
         </ScrollView>
 
@@ -294,28 +276,50 @@ export default function PackingCreateScreen() {
           </CustomButton>
         </View>
       </View>
+
+      {/* ✅ Vehicle picker */}
+      <GeneralPickerModal
+        open={vehiclePickerOpen}
+        title="Select Vehicle"
+        options={VEHICLE_OPTIONS}
+        value={selectedVehicle ?? ""}
+        searchable
+        searchLabel="Search"
+        searchPlaceholder="Type to search..."
+        emptyText="No results"
+        cancelText="Cancel"
+        onClose={() => setVehiclePickerOpen(false)}
+        onChange={(v: string) => {
+          setSelectedVehicle(v ? v : null);
+        }}
+      />
+
+      {/* ✅ Driver picker */}
+      <GeneralPickerModal
+        open={driverPickerOpen}
+        title="Select Driver"
+        options={DRIVER_OPTIONS}
+        value={selectedDriver ?? ""}
+        searchable
+        searchLabel="Search"
+        searchPlaceholder="Type to search..."
+        emptyText="No results"
+        cancelText="Cancel"
+        onClose={() => setDriverPickerOpen(false)}
+        onChange={(v: string) => {
+          setSelectedDriver(v ? v : null);
+        }}
+      />
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-    backgroundColor: "#ffffffff",
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 8,
-  },
-  scrollContent: {
-    paddingBottom: 80, // leave space for Save button
-  },
+  safe: { flex: 1, backgroundColor: "#ffffffff" },
+  content: { flex: 1, paddingHorizontal: 16, paddingTop: 8, paddingBottom: 8 },
+  scrollContent: { paddingBottom: 80 },
 
-  card: {
-    marginBottom: 16,
-  },
+  card: { marginBottom: 16 },
 
   cardHeader: {
     flexDirection: "row",
@@ -325,14 +329,12 @@ const styles = StyleSheet.create({
   cardHeaderTitle: {
     marginLeft: 8,
     fontFamily: "Karla-ExtraBold",
-    fontSize: 12,
+    fontSize: 15,
     letterSpacing: 1,
     color: "#000000ff",
   },
 
-  searchInputContainer: {
-    marginBottom: 8,
-  },
+  searchInputContainer: { marginBottom: 8 },
 
   parcelRow: {
     flexDirection: "row",
@@ -344,9 +346,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
 
-  parcelInfo: {
-    flex: 1,
-  },
+  parcelInfo: { flex: 1 },
   parcelCode: {
     fontFamily: "Karla-ExtraBold",
     fontSize: 13,
@@ -355,8 +355,8 @@ const styles = StyleSheet.create({
   },
   parcelDesc: {
     fontFamily: "Karla-Regular",
-    fontSize: 11,
-    color: "#6b7280",
+    fontSize: 13,
+    color: "#2e2f31",
   },
 
   addButton: {
@@ -371,7 +371,7 @@ const styles = StyleSheet.create({
   addButtonText: {
     marginLeft: 6,
     fontFamily: "Karla-Bold",
-    fontSize: 11,
+    fontSize: 13,
     color: "#ffffff",
   },
 
@@ -400,7 +400,7 @@ const styles = StyleSheet.create({
 
   emptyText: {
     fontFamily: "Karla-Regular",
-    fontSize: 12,
+    fontSize: 13,
     color: "#9ca3af",
     marginTop: 4,
   },
@@ -412,47 +412,31 @@ const styles = StyleSheet.create({
   },
   summaryText: {
     fontFamily: "Karla-Regular",
-    fontSize: 11,
-    color: "#6b7280",
+    fontSize: 13,
+    color: "#2e2f31",
   },
 
-  clearAllRow: {
-    marginTop: 10,
-    alignItems: "flex-end",
-  },
-  clearAllButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 999,
-    backgroundColor: "#ef4444",
-  },
-  clearAllText: {
+  clearAllRow: { marginTop: 10, alignItems: "flex-end" },
+
+  assignRow: { flexDirection: "row", gap: 10, marginTop: 8 },
+  assignLabel: {
     fontFamily: "Karla-Bold",
-    fontSize: 11,
-    color: "#ffffff",
+    fontSize: 13,
+    color: "#2e2f31",
+    marginBottom: 6,
   },
-
-  assignRow: {
-    flexDirection: "row",
-    marginTop: 8,
-  },
-  dropdown: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+  selectBox: {
     borderWidth: 1,
     borderColor: "#e5e7eb",
-    borderRadius: 10,
+    borderRadius: 12,
     paddingHorizontal: 12,
-    paddingVertical: 4,
+    paddingVertical: 12,
     backgroundColor: "#ffffff",
-    marginRight: 8,
   },
-  dropdownText: {
-    fontFamily: "Karla-Regular",
-    fontSize: 12,
-    color: "#6b7280",
+  selectText: {
+    fontFamily: "Karla-Bold",
+    fontSize: 13,
+    color: "#111827",
   },
 
   footer: {
@@ -461,14 +445,5 @@ const styles = StyleSheet.create({
     paddingTop: 4,
     alignItems: "flex-end",
   },
-  saveButton: {
-    minWidth: 110,
-    borderRadius: 999,
-  },
-  picker: {
-    flex: 1,        // let it fill the dropdown row
-    width: "100%",  // safe for Android
-    // no fixed height here
-  },
-
+  saveButton: { minWidth: 110, borderRadius: 999 },
 });

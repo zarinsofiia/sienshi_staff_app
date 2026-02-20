@@ -1,6 +1,6 @@
 // components/customer/CustomerTabs.tsx
 import React from "react";
-import { View, TouchableOpacity, Text, StyleSheet } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useLanguage } from "../../contexts/LanguageContext";
 
 type CustomerTabKey = "active" | "pending";
@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
     backgroundColor: ORANGE,
   },
   tabText: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: "600",
     color: "#6b7280",
   },

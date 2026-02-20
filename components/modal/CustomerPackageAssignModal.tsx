@@ -1,17 +1,17 @@
+import { Picker } from "@react-native-picker/picker";
 import React from "react";
 import {
-  Modal,
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  TextInput,
-  ScrollView,
-  ActivityIndicator,
+    ActivityIndicator,
+    Modal,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
-import { Picker } from "@react-native-picker/picker";
-import CustomButton from "../button/CustomButton";
 import type { EnTranslationKey } from "../../locales/en"; // 👈 adjust path if needed
+import CustomButton from "../button/CustomButton";
 
 type Translator = (key: EnTranslationKey) => string;
 
@@ -154,7 +154,7 @@ const CustomerPackageAssignModal: React.FC<Props> = ({
                       <Picker.Item
                         key={pkg.id}
                         value={pkg.id}
-                        label={`${pkg.package_name} (Size: ${pkg.size_price} • Weight: ${pkg.weight_price})`}
+                        label={`${pkg.package_name} (m³: ${pkg.size_price} • kg: ${pkg.weight_price})`}
                       />
                     ))}
                   </Picker>
@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   subtitle: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: "Karla-Regular",
     color: "#6b7280",
     marginBottom: 12,
@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   label: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: "Karla-Bold",
     color: "#4b5563",
     marginBottom: 6,
@@ -246,7 +246,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 10,
     paddingVertical: 8,
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: "Karla-Regular",
     color: "#111827",
   },
@@ -266,7 +266,7 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
   },
   emptyPkgText: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: "Karla-Regular",
     color: "#9ca3af",
   },

@@ -1,7 +1,7 @@
 import { Stack } from "expo-router";
 import React from "react";
 
-export default function StockLayout() {
+export default function StockInLayout() {
   return (
     <Stack
       screenOptions={{
@@ -12,7 +12,7 @@ export default function StockLayout() {
       <Stack.Screen name="index" />
 
       {/* /stock/view */}
-      <Stack.Screen name="view" />
+      <Stack.Screen name="list" />
     </Stack>
   );
 }

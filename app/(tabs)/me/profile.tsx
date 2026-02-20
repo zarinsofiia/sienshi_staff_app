@@ -1,15 +1,15 @@
 // app/(tabs)/me/profile.tsx
 
+import { useLocalSearchParams, useRouter } from "expo-router";
 import React from "react";
 import {
-  View,
-  Text,
   StyleSheet,
+  Text,
   TextInput,
   TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter, useLocalSearchParams } from "expo-router";
 import { AppHeader } from "../../../components/AppHeader";
 import { DetailSectionCard } from "../../../components/card/DetailSectionCard";
 
@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   label: {
-    fontSize: 11,
+    fontSize: 13,
     fontFamily: "Karla-Bold",
     color: "#4b5563",
     marginBottom: 4,

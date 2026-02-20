@@ -1,25 +1,24 @@
 // app/login.tsx  (Staff Login) — NO TOAST, NO SUCCESS ALERT (direct in), ERROR uses MobileAlertDialog
+import AsyncButton from "@/components/button/AsnycButton";
+import Input from "@/components/input/Input";
+import MobileAlertDialog from "@/components/modal/MobileAlertDialog";
+import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { router } from "expo-router";
 import React, { useState } from "react";
 import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
   Image,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { router } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
-import { useLanguage } from "../contexts/LanguageContext";
-import Input from "@/components/input/Input";
-import AsyncButton from "@/components/button/AsnycButton";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API_BASE_URL } from "../config/api";
-import MobileAlertDialog from "@/components/modal/MobileAlertDialog";
-import { registerPushTokens } from "../hooks/registerPush";
+import { useLanguage } from "../contexts/LanguageContext";
 type DialogType = "success" | "error";
 
 const ORANGE = "#f59e0b";
@@ -192,7 +191,7 @@ export default function LoginScreen() {
                     trimEnd
                   />
                 </View>
-     {/* PASSWORD */}
+                {/* PASSWORD */}
                 <View style={[styles.fieldGroup, { marginTop: 18 }]}>
                   <Input
                     label={t("login_password_label")}
@@ -227,7 +226,10 @@ export default function LoginScreen() {
                 </View>
 
 
-                <TouchableOpacity style={styles.forgotWrapper}>
+                <TouchableOpacity
+                  style={styles.forgotWrapper}
+                  onPress={() => router.push("/forgot-password")}
+                >
                   <Text style={styles.forgotText}>{t("login_forgot")}</Text>
                 </TouchableOpacity>
 
@@ -325,13 +327,13 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     height: 40,
-    fontSize: 12,
+    fontSize: 14,
     color: "#111827",
     marginLeft: 8,
   },
   forgotWrapper: { marginTop: 8, alignItems: "flex-end" },
   forgotText: {
-    fontSize: 12,
+    fontSize: 14,
     fontFamily: "Karla-Bold",
     fontWeight: "700",
     color: "#f59e0b",
@@ -346,20 +348,20 @@ const styles = StyleSheet.create({
   loginButtonText: {
     color: "#ffffff",
     fontWeight: "700",
-    fontSize: 12,
+    fontSize: 14,
     letterSpacing: 0.8,
   },
   langRow: {
-    marginTop: 16,
+    marginTop: 20,
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
   },
-   eyeBtn: {
+  eyeBtn: {
     paddingHorizontal: 6,
     paddingVertical: 6,
   },
-  langText: { fontSize: 12, color: "#9ca3af", fontFamily: "Karla-ExtraBold" },
+  langText: { fontSize: 16, color: "#9ca3af", fontFamily: "Karla-ExtraBold" },
   langActive: { color: ORANGE, fontFamily: "Karla-ExtraBold" },
-  langSeparator: { fontSize: 12, color: "#9ca3af", marginHorizontal: 6 },
+  langSeparator: { fontSize: 16, color: "#9ca3af", marginHorizontal: 6 },
 });

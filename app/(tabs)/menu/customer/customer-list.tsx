@@ -1,32 +1,31 @@
 // app/(tabs)/menu/customer/customer-list.tsx
 
-import React, { useEffect, useState, useCallback } from "react";
+import { router, useLocalSearchParams } from "expo-router";
+import React, { useCallback, useEffect, useState } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
   ActivityIndicator,
   FlatList,
+  StyleSheet,
+  Text,
   TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { AppHeader } from "../../../../components/AppHeader";
-import { useLanguage } from "../../../../contexts/LanguageContext";
-import { SegmentedTabs } from "../../../../components/tab/SegmentedTabs";
-import { API_BASE_URL } from "../../../../config/api";
-import { authedFetch } from "../../../../config/mobileApiClient";
-import SearchInput from "../../../../components/input/SearchInput";
-import ConfirmModal from "../../../../components/modal/ConfirmModal";
-import RejectReasonModal from "../../../../components/modal/RejectReasonModal";
-import CustomerPackageAssignModal from "../../../../components/modal/CustomerPackageAssignModal";
-import { router } from "expo-router";
-import { useMobileCustomerApprovalFlow } from "../../../../components/hooks/useMobileCustomerApprovalFlow";
-import MobileAlertDialog from "../../../../components/modal/MobileAlertDialog";
 import CustomerListItemCard, {
   CustomerListItem,
   TabKey,
 } from "../../../../components/customer/CustomerListItemCard";
-import { useLocalSearchParams } from "expo-router";
+import { useMobileCustomerApprovalFlow } from "../../../../components/hooks/useMobileCustomerApprovalFlow";
+import SearchInput from "../../../../components/input/SearchInput";
+import ConfirmModal from "../../../../components/modal/ConfirmModal";
+import CustomerPackageAssignModal from "../../../../components/modal/CustomerPackageAssignModal";
+import MobileAlertDialog from "../../../../components/modal/MobileAlertDialog";
+import RejectReasonModal from "../../../../components/modal/RejectReasonModal";
+import { SegmentedTabs } from "../../../../components/tab/SegmentedTabs";
+import { API_BASE_URL } from "../../../../config/api";
+import { authedFetch } from "../../../../config/mobileApiClient";
+import { useLanguage } from "../../../../contexts/LanguageContext";
 
 const PAGE_SIZE = 10;
 
@@ -389,7 +388,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   retryText: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: "Karla-Bold",
     color: "#f97316",
   },

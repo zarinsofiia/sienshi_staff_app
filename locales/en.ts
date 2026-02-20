@@ -53,7 +53,8 @@ const en = {
   // ===========================================================================
   home: "Home",
   menu: "Menu",
-  scan: "Scan",
+  // scan: "Scan",
+  scan: "Stock In",
   stock: "Stock",
   profile: "Me",
   tab_order: "Orders", // driver bottom tab
@@ -451,7 +452,62 @@ const en = {
   scan_confirm_complete_title: "Complete",
   scan_confirm_complete_message: "Once saved, you can't edit anymore",
   scan_cancel: "Cancel",
-  scan_confirm: "Confirm"
+  scan_confirm: "Confirm",
+
+  common_updated: 'Updated',
+  header_stock_in: 'Stock In',
+  pickup_completed_message: "Pickup completed.",
+
+  header_assigned_do: "Assigned DO",
+  stock_stocked_in: "stocked in",
+  stock_tab_pending: "Pending",
+  stock_tab_completed: "Completed",
+  common_manifest: "Manifest",
+
+  scan_unassigned: "Unassigned",
+  scan_loading_locations: "Loading...",
+  common_hide: "Hide",
+  common_page: "Page",
+  common_prev: "Prev",
+  common_next: "Next",
+  common_showing: "Showing",
+  common_results: "Results",
+  common_no_results: "No results",
+  scan_customer: "Customer",
+  scan_search_scanned_label: "Search Scanned",
+  scan_search_scanned_placeholder: "Search Code or Description",
+  scan_showing: "Showing",
+  scan_of: "of",
+  scan_no_match: "No matching parcels",
+  scan_grouped_by_location: " Grouped by location (tap header to collapse/expand).",
+  pickup_no_selection_title: " No Selection",
+  pickup_no_selection_message: "Please select at least one parcel",
+  pickup_failed_title: "Pickup failed",
+  pickup_invalid_customer_code: "Invalid customer code",
+  search: "Search",
+  scan_search_location: "Search Location",
+  scan_close: "Close",
+  assigned_do: "Assigned DO",
+
+
+  stock_selected: "Selected",
+
+  do_open_btn: "Open",
+  do_progress: "Progress",
+  do_delivered: "Delivered",
+  do_no_data: "No data",
+  forgot_title: "Forgot Password",
+  forgot_subtitle: "Enter your username or email. We will send reset instructions",
+  forgot_username_email_label: "Username/Email",
+  forgot_username_email_placeholder:"Enter username or email",
+  forgot_back_to_login: "Back to Login",
+  forgot_submit_button: "Send Reset Link",
+  forgot_success:"Reset instructions have been sent",
+  forgot_error: "Request failed",
+  common_success: "Success",
+  forgot_missing_fields: "Please enter your username or email",
+
+
 };
 
 export default en;

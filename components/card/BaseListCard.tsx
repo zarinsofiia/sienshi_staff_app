@@ -1,12 +1,12 @@
 // components/card/BaseListCard.tsx
 import React, { ReactNode } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
-  ViewStyle,
-  Pressable,
   Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  ViewStyle,
 } from "react-native";
 
 type StatusTone = "active" | "pending" | "danger" | "default";
@@ -104,11 +104,7 @@ const styles = StyleSheet.create({
   cardOuter: {
     marginBottom: 24,
     borderRadius: 16,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
-    elevation: 4,
-    backgroundColor: "transparent",
+ 
   },
 
   cardInner: {
@@ -154,7 +150,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   badgeTextBase: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: "Karla-Bold",
   },
   badgeActive: { backgroundColor: "#dcfce7" },

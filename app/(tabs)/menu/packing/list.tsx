@@ -1,24 +1,24 @@
 // app/(tabs)/menu/packing/list.tsx
 
+import { router, useLocalSearchParams } from "expo-router";
+import { Eye, Plus, Truck } from "lucide-react-native";
 import React, { useCallback, useEffect, useState } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
+  ActivityIndicator,
   FlatList,
   ListRenderItem,
-  ActivityIndicator,
+  StyleSheet,
+  Text,
   TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { AppHeader } from "../../../../components/AppHeader";
-import { useLocalSearchParams, router } from "expo-router";
-import { SegmentedTabs } from "../../../../components/tab/SegmentedTabs";
-import SearchInput from "../../../../components/input/SearchInput";
-import BasicCard from "../../../../components/card/BasicCard";
 import Button from "../../../../components/button/Button";
 import CustomButton from "../../../../components/button/CustomButton";
-import { Plus, Printer, Truck, Eye } from "lucide-react-native";
+import BasicCard from "../../../../components/card/BasicCard";
+import SearchInput from "../../../../components/input/SearchInput";
+import { SegmentedTabs } from "../../../../components/tab/SegmentedTabs";
 
 type PackingTabKey = "all" | "draft" | "assigned" | "complete";
 type PackingStatus = "draft" | "assigned" | "complete";
@@ -110,16 +110,8 @@ export default function PackingListScreen() {
   const tabs = [
     { key: "all" as PackingTabKey, label: "All", count: counts.all },
     { key: "draft" as PackingTabKey, label: "Draft", count: counts.draft },
-    {
-      key: "assigned" as PackingTabKey,
-      label: "Assigned",
-      count: counts.assigned,
-    },
-    {
-      key: "complete" as PackingTabKey,
-      label: "Completed",
-      count: counts.complete,
-    },
+    { key: "assigned" as PackingTabKey, label: "Assigned", count: counts.assigned },
+    { key: "complete" as PackingTabKey, label: "Completed", count: counts.complete },
   ];
 
   const handleChangeTab = (key: string) => {
@@ -127,22 +119,11 @@ export default function PackingListScreen() {
   };
 
   // 🔸 Single place to change later when you have API
-  const fetchFromApi = useCallback(
-    async (tab: PackingTabKey): Promise<PackingItem[]> => {
-      // TODO: replace this block with your real API call
-      // Example shape:
-      // const res = await authedFetch(`${API_BASE_URL}/api/packing/list?status=${tab}`, { method: "GET" });
-      // const data = await res.json();
-      // return data as PackingItem[];
-
-      // For now: simulate per-tab filtering using mock data
-      const all = MOCK_ITEMS;
-
-      if (tab === "all") return all;
-      return all.filter((item) => item.status === tab);
-    },
-    []
-  );
+  const fetchFromApi = useCallback(async (tab: PackingTabKey): Promise<PackingItem[]> => {
+    const all = MOCK_ITEMS;
+    if (tab === "all") return all;
+    return all.filter((item) => item.status === tab);
+  }, []);
 
   const fetchPackingLists = useCallback(
     async (tab: PackingTabKey) => {
@@ -202,19 +183,11 @@ export default function PackingListScreen() {
 
   // Search filter (on already-fetched list)
   const searchQuery = search.trim().toLowerCase();
-  const filteredItems = !searchQuery
-    ? items
-    : items.filter((item) =>
-      item.code.toLowerCase().includes(searchQuery)
-    );
+  const filteredItems = !searchQuery ? items : items.filter((item) => item.code.toLowerCase().includes(searchQuery));
 
   const renderItem: ListRenderItem<PackingItem> = ({ item }) => {
     const statusLabel =
-      item.status === "draft"
-        ? "Draft"
-        : item.status === "assigned"
-          ? "Assigned"
-          : "Completed";
+      item.status === "draft" ? "Draft" : item.status === "assigned" ? "Assigned" : "Completed";
 
     const statusStyle =
       item.status === "draft"
@@ -224,61 +197,54 @@ export default function PackingListScreen() {
           : styles.statusChipCompleted;
 
     return (
-      <BasicCard style={styles.card}>
-        {/* Top row: Code + status + truck pill */}
-        <View style={styles.cardTopRow}>
-          <View style={styles.codeRow}>
-            <Text style={styles.codeText}>{item.code}</Text>
-            <View style={[styles.statusChip, statusStyle]}>
-              <Text style={styles.statusChipText}>{statusLabel}</Text>
+      <TouchableOpacity
+        activeOpacity={0.92}
+        // onPress={() => goDetail(item)}
+      >
+
+        <BasicCard style={styles.card}>
+          {/* Top row: Code + status + truck pill */}
+          <View style={styles.cardTopRow}>
+            <View style={styles.codeRow}>
+              <Text style={styles.codeText}>{item.code}</Text>
+              <View style={[styles.statusChip, statusStyle]}>
+                <Text style={styles.statusChipText}>{statusLabel}</Text>
+              </View>
+            </View>
+
+            <View style={styles.truckChip}>
+              <Text style={styles.truckChipText}>{`Truck : ${item.truckLabel}`}</Text>
             </View>
           </View>
 
-          <View style={styles.truckChip}>
-            <Text style={styles.truckChipText}>{`Truck : ${item.truckLabel}`}</Text>
+          {/* Meta row */}
+          <Text style={styles.metaText}>{`Created ${item.createdAt} · ${item.itemCount} items · ${item.weightKg} kg`}</Text>
+
+          {/* Buttons row */}
+          <View style={styles.buttonRow}>
+            <CustomButton preset="info" style={styles.assignBtn} icon={Truck} iconPosition="left" iconSize={14}>
+              Assign
+            </CustomButton>
+
+            <CustomButton preset="view" style={styles.viewBtn} icon={Eye} iconPosition="left" iconSize={14}>
+              View
+            </CustomButton>
           </View>
-        </View>
+        </BasicCard>
 
-        {/* Meta row */}
-        <Text style={styles.metaText}>
-          {`Created ${item.createdAt} · ${item.itemCount} items · ${item.weightKg} kg`}
-        </Text>
+      </TouchableOpacity>
 
-        {/* Buttons row */}
-        <View style={styles.buttonRow}>
-          <CustomButton
-            preset="info"
-            style={styles.assignBtn}
-            icon={Truck}
-            iconPosition="left"
-            iconSize={14}
-          >
-            Assign
-          </CustomButton>
 
-          <CustomButton
-            preset="view"
-            style={styles.viewBtn}
-            icon={Eye}
-            iconPosition="left"
-            iconSize={14}
-          >
-            View
-          </CustomButton>
-
-          <CustomButton
-            preset="print"
-            style={styles.printBtn}
-            icon={Printer}
-            iconPosition="left"
-            iconSize={14}
-          >
-            Print
-          </CustomButton>
-        </View>
-
-      </BasicCard>
     );
+  };
+
+  const goCreate = () => {
+    router.push({
+      pathname: "/menu/packing/create",
+      params: {
+        backTo: "/menu/packing/list",
+      },
+    });
   };
 
   return (
@@ -289,13 +255,9 @@ export default function PackingListScreen() {
       {/* Main content area */}
       <View style={styles.content}>
         {/* Tabs */}
-        <SegmentedTabs
-          tabs={tabs}
-          activeKey={activeTab}
-          onChange={handleChangeTab}
-        />
+        <SegmentedTabs tabs={tabs} activeKey={activeTab} onChange={handleChangeTab} />
 
-        {/* Search row using SearchInput */}
+        {/* Search row using SearchInput (✅ removed New button here) */}
         <View style={styles.searchSection}>
           <View style={styles.searchRow}>
             <SearchInput
@@ -307,28 +269,6 @@ export default function PackingListScreen() {
               autoCorrect={false}
               autoCapitalize="none"
             />
-
-            <Button
-              size="sm"
-              rounded="md"
-              variant="orange"
-              bgColor="#EE9328"
-              icon={Plus}
-              iconPosition="left"
-              style={styles.newButton}
-              textStyle={styles.newButtonText}
-              onPress={() => {
-                router.push({
-                  pathname: "/menu/packing/create",
-                  params: {
-                    backTo: "/menu/packing/list", // ✅ forward backTo (or default to list)
-                  },
-                });
-              }}
-
-            >
-              New
-            </Button>
           </View>
         </View>
 
@@ -338,10 +278,7 @@ export default function PackingListScreen() {
             <ActivityIndicator size="small" color={ORANGE} />
           </View>
         ) : error ? (
-          <TouchableOpacity
-            style={styles.center}
-            onPress={() => fetchPackingLists(activeTab)}
-          >
+          <TouchableOpacity style={styles.center} onPress={() => fetchPackingLists(activeTab)}>
             <Text style={styles.errorText}>{error}</Text>
             <Text style={styles.retryText}>Tap to retry</Text>
           </TouchableOpacity>
@@ -350,17 +287,16 @@ export default function PackingListScreen() {
             data={filteredItems}
             keyExtractor={(item) => item.id}
             renderItem={renderItem}
-            contentContainerStyle={
-              filteredItems.length === 0
-                ? styles.emptyContainer
-                : styles.listContent
-            }
-            ListEmptyComponent={
-              <Text style={styles.emptyText}>No packing lists found.</Text>
-            }
+            contentContainerStyle={filteredItems.length === 0 ? styles.emptyContainer : styles.listContent}
+            ListEmptyComponent={<Text style={styles.emptyText}>No packing lists found.</Text>}
             showsVerticalScrollIndicator={false}
           />
         )}
+
+        {/* ✅ Floating Action Button (bottom-right) */}
+        <TouchableOpacity activeOpacity={0.9} onPress={goCreate} style={styles.fab}>
+          <Plus size={22} color="#ffffff" />
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
@@ -389,18 +325,7 @@ const styles = StyleSheet.create({
   },
   searchBoxWrapper: {
     flex: 1,
-    marginRight: 8,
   },
-  newButton: {
-    height: 40,
-    borderRadius: 10,
-    paddingHorizontal: 16,
-  },
-  newButtonText: {
-    fontFamily: "Karla-Bold",
-    fontSize: 12,
-  },
-
 
   /* Loading / Error */
   center: {
@@ -415,7 +340,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   retryText: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: "Karla-Bold",
     color: "#f97316",
   },
@@ -423,12 +348,13 @@ const styles = StyleSheet.create({
   /* List */
   listContent: {
     paddingTop: 8,
-    paddingBottom: 8,
+    paddingBottom: 90, // ✅ leave space so FAB doesn't cover last item
   },
   emptyContainer: {
     flexGrow: 1,
     alignItems: "center",
     justifyContent: "center",
+    paddingBottom: 90,
   },
   emptyText: {
     fontSize: 13,
@@ -462,7 +388,7 @@ const styles = StyleSheet.create({
     borderRadius: 999,
   },
   statusChipText: {
-    fontSize: 11,
+    fontSize: 12,
     fontFamily: "Karla-Bold",
   },
   statusChipDraft: {
@@ -481,34 +407,47 @@ const styles = StyleSheet.create({
     backgroundColor: "#f3f4f6",
   },
   truckChipText: {
-    fontSize: 11,
+    fontSize: 12,
     fontFamily: "Karla-Bold",
     color: "#4b5563",
   },
   metaText: {
-    fontSize: 11,
+    fontSize: 13,
     fontFamily: "Karla-Regular",
-    color: "#6b7280",
+    color: "#2e2f31",
     marginBottom: 12,
-    marginTop: 10
+    marginTop: 10,
   },
   buttonRow: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "flex-end", // was 'space-between'
+    justifyContent: "flex-end",
     marginTop: 4,
   },
-
   assignBtn: {
-    marginRight: 8,               // remove flex: 1.1
+    marginRight: 8,
   },
-
   viewBtn: {
-    marginRight: 8,               // remove flex: 0.9
+    marginRight: 8,
   },
 
-  printBtn: {
-    // no flex, let CustomButton minWidth handle it
+  /* ✅ FAB */
+  fab: {
+    position: "absolute",
+    right: 16,
+    bottom: 16,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: "#EE9328",
+    alignItems: "center",
+    justifyContent: "center",
+    // shadow (iOS)
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    // elevation (Android)
+    elevation: 6,
   },
-
 });

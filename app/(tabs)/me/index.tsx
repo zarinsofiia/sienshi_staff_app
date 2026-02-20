@@ -1,22 +1,22 @@
 // app/(tabs)/me/index.tsx
 
+import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
   ActivityIndicator,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
 import { AppHeader } from "../../../components/AppHeader";
-import { useRouter } from "expo-router";
-import { useLanguage } from "../../../contexts/LanguageContext";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { DetailSectionCard } from "../../../components/card/DetailSectionCard";
 import { API_BASE_URL } from "../../../config/api";
 import { authedFetch } from "../../../config/mobileApiClient";
-import { DetailSectionCard } from "../../../components/card/DetailSectionCard";
+import { useLanguage } from "../../../contexts/LanguageContext";
 
 const ORANGE = "#f59e0b";
 
@@ -33,36 +33,36 @@ export default function MeScreen() {
 
   const user = MOCK_USER; // later: replace with real API data
 
- const handleLogout = async () => {
-  if (loggingOut) return;
-  setLoggingOut(true);
+  const handleLogout = async () => {
+    if (loggingOut) return;
+    setLoggingOut(true);
 
-  try {
-    // ✅ Call logout using Bearer token (authedFetch attaches it)
-    const res = await authedFetch(`${API_BASE_URL}/api/auth/logout`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      // ❌ remove body (no hardcoded username/password)
-    });
-
-    // Optional: log/debug response
-    const text = await res.text().catch(() => "");
-    console.log("Logout status:", res.status, "body:", text);
-  } catch (e) {
-    console.log("Logout error:", e);
-  } finally {
     try {
-      await AsyncStorage.multiRemove(["authToken", "refreshToken", "currentUser"]);
-    } catch (e) {
-      console.log("Failed clearing storage on logout:", e);
-    }
+      // ✅ Call logout using Bearer token (authedFetch attaches it)
+      const res = await authedFetch(`${API_BASE_URL}/api/auth/logout`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        // ❌ remove body (no hardcoded username/password)
+      });
 
-    setLoggingOut(false);
-    router.replace("/login" as any);
-  }
-};
+      // Optional: log/debug response
+      const text = await res.text().catch(() => "");
+      console.log("Logout status:", res.status, "body:", text);
+    } catch (e) {
+      console.log("Logout error:", e);
+    } finally {
+      try {
+        await AsyncStorage.multiRemove(["authToken", "refreshToken", "currentUser"]);
+      } catch (e) {
+        console.log("Failed clearing storage on logout:", e);
+      }
+
+      setLoggingOut(false);
+      router.replace("/login" as any);
+    }
+  };
 
 
   const goProfile = () => {
@@ -238,9 +238,9 @@ const styles = StyleSheet.create({
   },
   profileMeta: {
     marginTop: 4,
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: "Karla-Regular",
-    color: "#4b5563",
+    color: "#2e2f31",
   },
 
   row: {
@@ -276,9 +276,9 @@ const styles = StyleSheet.create({
     color: "#111827",
   },
   rowSubtitle: {
-    fontSize: 11,
+    fontSize: 13,
     fontFamily: "Karla-Regular",
-    color: "#6b7280",
+    color: "#2e2f31",
     marginTop: 2,
   },
   editPill: {
@@ -288,7 +288,7 @@ const styles = StyleSheet.create({
     backgroundColor: ORANGE,
   },
   editPillText: {
-    fontSize: 11,
+    fontSize: 13,
     fontFamily: "Karla-Bold",
     color: "#ffffff",
   },

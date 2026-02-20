@@ -1,8 +1,8 @@
 // app/(tabs)/menu/pickup/view.tsx
-import React, { useMemo } from "react";
-import { View, Text, StyleSheet, ScrollView } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams } from "expo-router";
+import React, { useMemo } from "react";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import { AppHeader } from "../../../../components/AppHeader";
 import BasicCard from "../../../../components/card/BasicCard";
@@ -71,13 +71,13 @@ const styles = StyleSheet.create({
 
   sectionTitle: {
     fontFamily: "Karla-ExtraBold",
-    fontSize: 12,
+    fontSize: 13,
     letterSpacing: 1,
     color: "#111827",
     marginBottom: 10,
   },
 
-  line: { fontFamily: "Karla-Regular", fontSize: 12, color: "#374151", marginBottom: 8 },
+  line: { fontFamily: "Karla-Regular", fontSize: 13, color: "#374151", marginBottom: 8 },
   label: { fontFamily: "Karla-Bold", color: ORANGE },
 
   hint: { fontFamily: "Karla-Regular", fontSize: 11, color: "#9ca3af", marginTop: 6 },

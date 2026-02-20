@@ -1,15 +1,15 @@
 // components/input/SearchInput.tsx
+import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import {
-  View,
+  StyleSheet,
   Text,
   TextInput,
-  StyleSheet,
   TextInputProps,
-  ViewStyle,
   TouchableOpacity,
+  View,
+  ViewStyle,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 
 export interface SearchInputProps extends TextInputProps {
   label?: string;
@@ -73,7 +73,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
 
 const styles = StyleSheet.create({
   label: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: "Karla-ExtraBold",
     letterSpacing: 1,
     color: "#000000ff",
@@ -95,10 +95,10 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    fontSize: 12,
+    fontSize: 14,
     fontFamily: "Karla-Regular",
     color: "#000000ff",
-    paddingVertical: 0,
+    paddingVertical: 8,
   },
   clearBtn: {
     marginLeft: 8,

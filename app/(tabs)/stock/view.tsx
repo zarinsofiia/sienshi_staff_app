@@ -1,23 +1,23 @@
 // app/(tabs)/stock/view.tsx
+import { useLocalSearchParams } from "expo-router";
+import { Info, MapPin } from "lucide-react-native";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
   ActivityIndicator,
+  ScrollView,
+  StyleSheet,
+  Text,
   TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useLocalSearchParams } from "expo-router";
-import { MapPin, Info } from "lucide-react-native";
 
 import { AppHeader } from "../../../components/AppHeader";
 import BasicCard from "../../../components/card/BasicCard";
 import SearchInput from "../../../components/input/SearchInput";
-import { useLanguage } from "../../../contexts/LanguageContext";
-import { authedFetch } from "../../../config/mobileApiClient";
 import { API_BASE_URL } from "../../../config/api";
+import { authedFetch } from "../../../config/mobileApiClient";
+import { useLanguage } from "../../../contexts/LanguageContext";
 
 const ORANGE = "#EE9328";
 const PAGE_SIZE = 10;
@@ -701,13 +701,13 @@ const styles = StyleSheet.create({
   cardHeaderTitle: {
     marginLeft: 8,
     fontFamily: "Karla-ExtraBold",
-    fontSize: 12,
+    fontSize: 13,
     letterSpacing: 1,
     color: "#111827",
   },
   summaryText: {
     fontFamily: "Karla-Regular",
-    fontSize: 12,
+    fontSize: 13,
     color: "#6b7280",
   },
 
@@ -721,13 +721,13 @@ const styles = StyleSheet.create({
 
   sectionTitle: {
     fontFamily: "Karla-ExtraBold",
-    fontSize: 12,
+    fontSize: 13,
     letterSpacing: 1,
     color: "#111827",
     marginBottom: 10,
   },
 
-  emptyText: { fontFamily: "Karla-Regular", fontSize: 12, color: "#9ca3af" },
+  emptyText: { fontFamily: "Karla-Regular", fontSize: 13, color: "#9ca3af" },
 
   // LOCATION ROWS
   locRow: {
@@ -781,8 +781,8 @@ const styles = StyleSheet.create({
     color: ORANGE,
     marginBottom: 2,
   },
-  itemDesc: { fontFamily: "Karla-Regular", fontSize: 12, color: "#6b7280" },
-  itemMeta: { marginTop: 6, fontFamily: "Karla-Regular", fontSize: 12, color: "#9ca3af" },
+  itemDesc: { fontFamily: "Karla-Regular", fontSize: 13, color: "#6b7280" },
+  itemMeta: { marginTop: 6, fontFamily: "Karla-Regular", fontSize: 13, color: "#9ca3af" },
 
   metaRow: { marginTop: 10, flexDirection: "row", alignItems: "center", gap: 10 },
 
@@ -806,5 +806,5 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#ffffff",
   },
-  loadMoreText: { fontFamily: "Karla-Bold", fontSize: 12, color: ORANGE },
+  loadMoreText: { fontFamily: "Karla-Bold", fontSize: 13, color: ORANGE },
 });

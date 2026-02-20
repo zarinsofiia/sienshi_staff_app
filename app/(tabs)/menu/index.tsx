@@ -50,48 +50,14 @@ const MenuSection: React.FC<{
 export default function MenuScreen() {
   const { t, lang } = useLanguage();
   const [sections, setSections] = useState<MenuSectionConfig[]>([]);
-  const createStockInAndGoScan = useCallback(async () => {
-    try {
-      const res = await authedFetch(
-        `${API_BASE_URL}/api/stock_in/create_stock_in`,
-        {
-          method: "POST",
-          body: JSON.stringify({}),
-        }
-      );
-
-      const text = await res.text().catch(() => "");
-      let data: any = null;
-      try {
-        data = text ? JSON.parse(text) : null;
-      } catch {
-        data = null;
-      }
-
-      if (!res.ok) {
-        console.log("create_stock_in error:", res.status, text || data);
-        return;
-      }
-
-      const stockinId =
-        data?.id ||
-        data?.stockin_id ||
-        data?.stock_in_id ||
-        data?.data?.id ||
-        data?.data?.stockin_id ||
-        null;
-
-      router.replace({
-        pathname: "/scan",
-        params: {
-          backTo: "/menu",
-          ...(stockinId ? { stockinId: String(stockinId) } : {}),
-        },
-      });
-    } catch (e) {
-      console.log("create_stock_in exception:", e);
-    }
-  }, []);
+  const createStockInAndGoScan = useCallback(() => {
+    router.replace({
+      pathname: "/scan",
+      params: {
+        backTo: "/menu",
+      },
+    });
+  }, [router]);
 
   useEffect(() => {
     let isMounted = true;
@@ -241,10 +207,10 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   sectionTitle: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: "Karla-Bold",
     letterSpacing: 1,
-    color: "#6b7280",
+    color: "#2e2f31",
     marginTop: 12,
     marginBottom: 8,
   },

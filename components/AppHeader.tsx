@@ -1,29 +1,32 @@
 // components/AppHeader.tsx
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Image,
+  ImageSourcePropType,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useLanguage } from "../contexts/LanguageContext";
 
 type AppHeaderProps = {
-  // either pass a raw title OR a translation key
   title?: string;
-  titleKey?: string;          // e.g. "header_dashboard"
-  showBack?: boolean;         // show back button on left
-  showNotification?: boolean; // show notification icon on right
+  titleKey?: string;
+  showBack?: boolean;
 
-  /**
-   * Optional: route path to go back to.
-   * If provided, header will do:
-   *   router.replace(backTo)
-   * If not provided, it falls back to router.back().
-   */
+  // ✅ optional left logo (shown when showBack = false)
+  leftLogo?: ImageSourcePropType;
+  onLogoPress?: () => void;
+
+  // notification
+  showNotification?: boolean;
+  notificationCount?: number;
+  onNotificationPress?: () => void;
+
   backTo?: string;
-
-  /**
-   * Optional custom back handler.
-   * If this exists, it will be used instead of backTo / router.back().
-   */
   onBack?: () => void;
 };
 
@@ -31,7 +34,14 @@ export function AppHeader({
   title,
   titleKey,
   showBack = false,
+
+  leftLogo,
+  onLogoPress,
+
   showNotification = false,
+  notificationCount = 0,
+  onNotificationPress,
+
   backTo,
   onBack,
 }: AppHeaderProps) {
@@ -42,54 +52,65 @@ export function AppHeader({
   const upperTitle = rawTitle.toUpperCase();
 
   const handleBack = () => {
-    if (onBack) {
-      // highest priority: custom handler
-      onBack();
-    } else if (backTo) {
-      // dynamic target => REPLACE (clean stack)
-      router.replace(backTo as any);
-    } else {
-      // fallback if there's truly nothing to go back to
-      router.replace("/dashboard"); // change this to your home screen
-    }
+    if (onBack) onBack();
+    else if (backTo) router.replace(backTo as any);
+    else router.replace("/dashboard");
   };
+
+  const handleNotification = () => {
+    if (onNotificationPress) onNotificationPress();
+    else router.push("/notifications" as any);
+  };
+
+  const count = Number.isFinite(notificationCount) ? notificationCount : 0;
+  const showBadge = showNotification && count > 0;
+  const badgeText = count > 99 ? "99+" : String(count);
 
   return (
     <View style={styles.container}>
-      {/* LEFT SIDE (back button) */}
+      {/* LEFT */}
       <View style={styles.side}>
-        {showBack && (
+        {showBack ? (
           <TouchableOpacity onPress={handleBack} style={styles.iconButton}>
-            <Ionicons name="arrow-back" size={20} color="#E89923" />
+            <Ionicons name="arrow-back-sharp" size={22} color="#E89923" />
           </TouchableOpacity>
-        )}
+        ) : leftLogo ? (
+          <TouchableOpacity
+            onPress={onLogoPress}
+            activeOpacity={onLogoPress ? 0.8 : 1}
+            disabled={!onLogoPress}
+            style={styles.logoBtn}
+          >
+            <Image source={leftLogo} style={styles.logo} />
+          </TouchableOpacity>
+        ) : null}
       </View>
 
-      {/* CENTER TITLE */}
+      {/* CENTER */}
       <View style={styles.center}>
         <Text style={styles.title}>{upperTitle}</Text>
       </View>
 
-      {/* RIGHT SIDE (notification) */}
+      {/* RIGHT */}
       <View style={[styles.side, styles.rightSide]}>
-        {showNotification && (
-          <TouchableOpacity
-            onPress={() => {
-              console.log("Notification pressed");
-            }}
-            style={styles.iconButton}
-          >
-            <Ionicons
-              name="notifications-outline"
-              size={20}
-              color="#E89923"
-            />
+        {showNotification ? (
+          <TouchableOpacity onPress={handleNotification} style={styles.iconButton}>
+            <Ionicons name="notifications-outline" size={22} color="#E89923" />
+            {showBadge ? (
+              <View style={styles.badge}>
+                <Text style={styles.badgeText} numberOfLines={1}>
+                  {badgeText}
+                </Text>
+              </View>
+            ) : null}
           </TouchableOpacity>
-        )}
+        ) : null}
       </View>
     </View>
   );
 }
+
+const SIDE_W = 72;
 
 const styles = StyleSheet.create({
   container: {
@@ -100,26 +121,57 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   side: {
-    width: 40,
-    alignItems: "flex-start",
+    width: SIDE_W, // ✅ keep left/right same width so title stays centered
     justifyContent: "center",
+    alignItems: "flex-start",
   },
   rightSide: {
     alignItems: "flex-end",
   },
   iconButton: {
     padding: 4,
+    position: "relative",
   },
+
+  logoBtn: {
+    paddingVertical: 2,
+    paddingRight: 6,
+  },
+  logo: {
+    height: 50,
+    width: 80,
+    resizeMode: "contain",
+  },
+
   center: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
   },
   title: {
-    fontSize: 16,
+    fontSize: 18,
     fontFamily: "Karla-ExtraBold",
     color: "#E89923",
     textAlign: "center",
+  },
+
+  badge: {
+    position: "absolute",
+    top: -2,
+    right: -2,
+    minWidth: 16,
+    height: 16,
+    paddingHorizontal: 4,
+    borderRadius: 999,
+    backgroundColor: "#ef4444",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  badgeText: {
+    fontSize: 10,
+    lineHeight: 12,
+    fontFamily: "Karla-ExtraBold",
+    color: "#ffffff",
   },
 });
 

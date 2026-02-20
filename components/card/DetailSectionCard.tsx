@@ -1,6 +1,6 @@
 // components/card/DetailSectionCard.tsx
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
 type DetailRowProps = {
   label: string;
@@ -67,13 +67,13 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   rowLabel: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: "Karla-Regular",
     color: "#6b7280",
     flex: 0.5,
   },
   rowValue: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: "Karla-Bold",
     color: "#111827",
     textAlign: "right",

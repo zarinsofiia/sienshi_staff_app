@@ -13,7 +13,7 @@ export default function MenuStackLayout() {
       <Stack.Screen name="customer/customer-view" />
 
       {/* pickup & packing screens (already created as files) */}
-      <Stack.Screen name="pickup/index" />
+      <Stack.Screen name="pickup" />
       <Stack.Screen name="packing/list" />
       <Stack.Screen name="packing/create"  />
     </Stack>

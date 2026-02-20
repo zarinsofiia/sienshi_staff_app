@@ -1,9 +1,9 @@
 // components/customer/CustomerListItemCard.tsx
-import React from "react";
-import { View, Text, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { BaseListCard } from "../card/BaseListCard";
+import React from "react";
+import { StyleSheet, Text, View } from "react-native";
 import CustomButton from "../button/CustomButton";
+import { BaseListCard } from "../card/BaseListCard";
 
 export type TabKey = "all" | "active" | "pending";
 
@@ -195,7 +195,7 @@ const CustomerListItemCard: React.FC<Props> = ({
 
 const styles = StyleSheet.create({
   nameText: {
-    fontSize: 12,
+    fontSize: 13,
     textTransform: "uppercase",
     fontWeight: "600",
     fontFamily: "Karla-ExtraBold",
@@ -203,13 +203,13 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   custTypeInline: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: "Karla-Bold",
     color: "#92400e",
     textTransform: "uppercase",
   },
   metaText: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: "Karla-Regular",
     color: "#473124ff",
     marginBottom: 8,
